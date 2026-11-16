@@ -78,12 +78,12 @@ sudo ./deploy/install.sh --instance ap1
 
 **2. Generate the config for the instance.** `init` reads the configs of your other services and
 picks a free block of ports for `snmp.port_base`. It sets `state_dir` to the instance folder, names
-the root `aimesh-ap1`, and writes the files into `/etc/aimesh-snmp-proxy/ap1`. `--force` replaces the
-files that the installer seeded.
+the root `aimesh-ap1`, and writes the files into `/etc/aimesh-snmp-proxy/ap1`. It replaces the files
+that the installer seeded, and your own edits only with `--force`.
 
 ```sh
 APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
-sudo $APP init --instance ap1 --detect --force
+sudo $APP init --instance ap1 --detect
 ```
 
 To write the files yourself, see [Write the config by hand](onboarding/manual.md). Use the instance

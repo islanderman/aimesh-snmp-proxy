@@ -20,7 +20,7 @@ every service that polls this device.
 
 ```sh
 APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
-sudo $APP init --detect --force
+sudo $APP init --detect
 ```
 
 `init` asks a few questions. Each shows its default in brackets, and Enter takes it. The questions
@@ -42,8 +42,9 @@ detected: a standalone router, AP or media bridge
 ```
 
 It writes `config.toml`, `asus_password`, a random `snmp_community`, and `asus_router.pem` into
-`/etc/aimesh-snmp-proxy`. The installer already made `config.toml` and the empty files, so `--force`
-replaces them. Without `--force`, `init` replaces nothing. It prints the next steps.
+`/etc/aimesh-snmp-proxy`. It replaces the `config.toml` and the empty files that the installer
+seeded. It replaces an edited config or a filled secret file only with `--force`, and a forced run
+makes a new SNMP community. It prints the next steps.
 
 To answer with flags instead, pass `--host`. To write the files yourself, see
 [Write the config by hand](manual.md).
