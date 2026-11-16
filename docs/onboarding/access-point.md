@@ -23,8 +23,11 @@ APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
 sudo $APP init --detect --force
 ```
 
-`init` asks for the address of the device, the HTTPS port, the admin user, the name that LibreNMS
-shows, and the admin password. The password prompt does not echo.
+`init` asks a few questions. Each shows its default in brackets, and Enter takes it. The questions
+are the instance name (leave it empty), the router address, the HTTPS port, the admin user, the
+router type (`auto` is right), the name that LibreNMS shows, the SNMP port base, and the LibreNMS
+address (optional). It asks for the admin password last, and the prompt does not echo. See
+[`init`](../reference/cli.md#init) for every flag.
 
 Answer the name question with a name of your own, for example `hall-ap`. The default
 `aimesh-root` clashes in LibreNMS when you serve a second router.
@@ -42,7 +45,7 @@ It writes `config.toml`, `asus_password`, a random `snmp_community`, and `asus_r
 `/etc/aimesh-snmp-proxy`. The installer already made `config.toml` and the empty files, so `--force`
 replaces them. Without `--force`, `init` replaces nothing. It prints the next steps.
 
-To answer with flags, see [`init`](../reference/cli.md#init). To write the files yourself, see
+To answer with flags instead, pass `--host`. To write the files yourself, see
 [Write the config by hand](manual.md).
 
 ## 4. Run the installer again
