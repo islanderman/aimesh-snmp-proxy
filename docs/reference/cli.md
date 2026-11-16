@@ -615,7 +615,7 @@ Next steps (APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy):
   4. sudo $APP -c /etc/aimesh-snmp-proxy/config.toml check-config
   5. sudo $APP -c /etc/aimesh-snmp-proxy/config.toml selftest  (with the service stopped)
   6. sudo systemctl enable --now aimesh-snmp-proxy
-  7. add [onboard] (or re-run init with --librenms-url), then sudo $APP -c /etc/aimesh-snmp-proxy/config.toml onboard --apply
+  7. add [onboard] to /etc/aimesh-snmp-proxy/config.toml by hand (url, and token_file = "librenms_token"), put a LibreNMS API token in /etc/aimesh-snmp-proxy/librenms_token (0600), then sudo $APP -c /etc/aimesh-snmp-proxy/config.toml onboard, then onboard --apply
 ```
 
 With `--output-dir`, a first step says to move the files to the folder that the installer reads.
