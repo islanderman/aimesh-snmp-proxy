@@ -1,0 +1,695 @@
+{
+  "_source": "Synthetic, in the format `discover --fixtures` writes: the key allowlist and value shapes of a capture, with made-up values",
+  "appget": {
+    "buildno": "388",
+    "cpu_usage": {
+      "cpu1_total": "3600011",
+      "cpu1_usage": "144000",
+      "cpu2_total": "3600007",
+      "cpu2_usage": "108000",
+      "cpu3_total": "3600009",
+      "cpu3_usage": "126000",
+      "cpu4_total": "3600013",
+      "cpu4_usage": "7200"
+    },
+    "extendno": "10001-g0000001",
+    "firmver": "3.0.0.4",
+    "get_clientlist": {
+      "02:00:00:00:00:02": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:02",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:03": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:03",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:04": {
+        "curRx": "72.2",
+        "curTx": "65",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "1",
+        "mac": "02:00:00:00:00:04",
+        "rssi": "-41"
+      },
+      "02:00:00:00:00:05": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:05",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:06": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:06",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:07": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "0",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:07",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:08": {
+        "curRx": "5.5",
+        "curTx": "65",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "2",
+        "mac": "02:00:00:00:00:08",
+        "rssi": "-48"
+      },
+      "02:00:00:00:00:09": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:09",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:0A": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:0A",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:0B": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:0B",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:0C": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:0C",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:0D": {
+        "curRx": "54",
+        "curTx": "72.2",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "1",
+        "mac": "02:00:00:00:00:0D",
+        "rssi": "-55"
+      },
+      "02:00:00:00:00:0E": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:0E",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:0F": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:0F",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:10": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "0",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:10",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:11": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:11",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:12": {
+        "curRx": "6",
+        "curTx": "510.4",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "3",
+        "mac": "02:00:00:00:00:12",
+        "rssi": "-62"
+      },
+      "02:00:00:00:00:13": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:13",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:14": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:14",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:15": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "0",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:15",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:16": {
+        "curRx": "11",
+        "curTx": "65",
+        "isGN": "",
+        "isOnline": "0",
+        "isWL": "1",
+        "mac": "02:00:00:00:00:16",
+        "rssi": "-67"
+      },
+      "02:00:00:00:00:17": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:17",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:18": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:18",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:19": {
+        "curRx": "288.2",
+        "curTx": "864.7",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "2",
+        "mac": "02:00:00:00:00:19",
+        "rssi": "-70"
+      },
+      "02:00:00:00:00:1A": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:1A",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:1B": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:1B",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:1C": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:1C",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:1D": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "0",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:1D",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:1E": {
+        "curRx": "65",
+        "curTx": "65",
+        "isGN": "",
+        "isOnline": "0",
+        "isWL": "1",
+        "mac": "02:00:00:00:00:1E",
+        "rssi": "-58"
+      },
+      "02:00:00:00:00:1F": {
+        "curRx": "",
+        "curTx": "",
+        "isGN": "",
+        "isOnline": "1",
+        "isWL": "0",
+        "mac": "02:00:00:00:00:1F",
+        "rssi": "0"
+      },
+      "02:00:00:00:00:20": {
+        "curRx": "0",
+        "curTx": "0",
+        "isGN": "",
+        "isOnline": "0",
+        "isWL": "2",
+        "mac": "02:00:00:00:00:20",
+        "rssi": "-73"
+      }
+    },
+    "get_clientlist_from_json_database": {
+      "02:00:00:00:00:02": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:02",
+        "wireless": 0
+      },
+      "02:00:00:00:00:03": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:03",
+        "wireless": 0
+      },
+      "02:00:00:00:00:04": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:04",
+        "wireless": 0
+      },
+      "02:00:00:00:00:05": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:05",
+        "wireless": 0
+      },
+      "02:00:00:00:00:06": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:06",
+        "wireless": 0
+      },
+      "02:00:00:00:00:07": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:07",
+        "wireless": 0
+      },
+      "02:00:00:00:00:08": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:08",
+        "wireless": 0
+      },
+      "02:00:00:00:00:09": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:09",
+        "wireless": 0
+      },
+      "02:00:00:00:00:0A": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:0A",
+        "wireless": 0
+      },
+      "02:00:00:00:00:0B": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:0B",
+        "wireless": 0
+      },
+      "02:00:00:00:00:0C": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:0C",
+        "wireless": 0
+      },
+      "02:00:00:00:00:0D": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:0D",
+        "wireless": 0
+      },
+      "02:00:00:00:00:0E": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:0E",
+        "wireless": 0
+      },
+      "02:00:00:00:00:0F": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:0F",
+        "wireless": 0
+      },
+      "02:00:00:00:00:10": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:10",
+        "wireless": 0
+      },
+      "02:00:00:00:00:11": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:11",
+        "wireless": 0
+      },
+      "02:00:00:00:00:12": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:12",
+        "wireless": 0
+      },
+      "02:00:00:00:00:13": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:13",
+        "wireless": 0
+      },
+      "02:00:00:00:00:14": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:14",
+        "wireless": 0
+      },
+      "02:00:00:00:00:15": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:15",
+        "wireless": 0
+      },
+      "02:00:00:00:00:16": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:16",
+        "wireless": 0
+      },
+      "02:00:00:00:00:24": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:24",
+        "wireless": 0
+      },
+      "02:00:00:00:00:25": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:25",
+        "wireless": 0
+      },
+      "02:00:00:00:00:26": {
+        "amesh_isRe": "0",
+        "mac": "02:00:00:00:00:26",
+        "wireless": 0
+      }
+    },
+    "get_ui_support": {
+      "11AC": 1,
+      "11AX": 1,
+      "5G": 1,
+      "5g1_dfs": 1,
+      "5g2_dfs": 0,
+      "AWV_dpi_cc": 1,
+      "AWV_dpi_mals": 1,
+      "AWV_dpi_vp": 1,
+      "AWV_ledg": 0,
+      "AWV_ookla": 2,
+      "AWV_vpnc": 2,
+      "AWV_vpns": 2,
+      "CHPASS": 1,
+      "CN_Boost": 0,
+      "FAMILY_GROUP": 1,
+      "HTTPS": 1,
+      "Instant_Guard": 5,
+      "MaxLen_http_name": 32,
+      "MaxLen_http_passwd": 32,
+      "MaxRule_PC_DAYTIME": 256,
+      "MaxRule_VPN_FUSION_Conn": 2,
+      "MaxRule_bwdpi_wrs": 64,
+      "MaxRule_extend_limit": 64,
+      "MaxRule_parentctrl": 64,
+      "NEW_PHYMAP": 2,
+      "NEW_PHYMAP_DEFAULT_MODE": 1,
+      "PARENTAL2": 1,
+      "PC_REWARD": 1,
+      "PC_SCHED_V3": 3,
+      "RPMesh": 0,
+      "WIFI_LOGO": 1,
+      "WL_SCHED_V2": 1,
+      "WL_SCHED_V3": 2,
+      "account_binding": 2,
+      "acl96": 1,
+      "acs_dfs": 1,
+      "adaptive_qos": 1,
+      "afwupg": 1,
+      "aicloudipk": 0,
+      "alexa": 1,
+      "amas": 2,
+      "amasNode": 1,
+      "amasRouter": 1,
+      "amas_eap": 1,
+      "amas_wgn": 1,
+      "app": 1,
+      "app_mnt": 1,
+      "appnet": 1,
+      "apps_filter": 1,
+      "asus_pp": 2,
+      "awsiot": 1,
+      "bandwidth_monitor": 1,
+      "bcmhnd": 1,
+      "bcmwifi": 1,
+      "betaupg": 1,
+      "bwdpi": 2,
+      "captcha": 2,
+      "cd_iperf": 0,
+      "cfg_sync": 0,
+      "cfg_wps_btn": 1,
+      "cloudcheck": 1,
+      "cloudsync": 1,
+      "cobrand_change": 0,
+      "concurrep": 0,
+      "conndiag": 2,
+      "dblog": 1,
+      "ddns": 2,
+      "del_client_data": 1,
+      "dhcp_static_dns": 1,
+      "dhdlog": 1,
+      "dis11b": 1,
+      "diskutility": 1,
+      "dnsfilter": 2,
+      "dnspriv": 1,
+      "dnssec": 1,
+      "dpi_cc": 1,
+      "dpi_mals": 1,
+      "dpi_vp": 1,
+      "dpsr": 0,
+      "dslite": 1,
+      "dualband": 0,
+      "dualwan": 1,
+      "email": 1,
+      "eula": 2,
+      "force_roaming": 1,
+      "frs_feedback": 2,
+      "ftp_ssl": 1,
+      "fupgrade": 1,
+      "gameMode": 1,
+      "google_asst": 1,
+      "gu_accel": 0,
+      "hdspindown": 1,
+      "hnd": 1,
+      "inadyn": 1,
+      "internetctrl": 1,
+      "iperf3": 1,
+      "ipsec_srv": 5,
+      "ipv6": 1,
+      "ipv6nat": 1,
+      "ipv6pt": 1,
+      "lacp": 1,
+      "led_ctrl_cap": 4,
+      "ledg": 0,
+      "ledg_count": 0,
+      "letsencrypt": 1,
+      "localap": 1,
+      "manual_stb": 1,
+      "mbo": 1,
+      "media": 1,
+      "mobile_game_mode": 2,
+      "modem": 1,
+      "movistarTriple": 1,
+      "mssid": 0,
+      "mssid_count": 0,
+      "mumimo": 1,
+      "nandflash": 1,
+      "netool": 1,
+      "noFwManual": 0,
+      "noRouter": 0,
+      "no_finiwl": 1,
+      "noasusddns": 0,
+      "noasusddns_cn": 1,
+      "nordvpn": 1,
+      "noupdate": 0,
+      "nt_center": 5,
+      "nt_center_ui": 0,
+      "nwtool": 1,
+      "ocnvc": 1,
+      "odm": 0,
+      "ofdma": 1,
+      "ookla": 1,
+      "openvpnd": 1,
+      "owe_trans": 1,
+      "pptpd": 1,
+      "pre_auth_PAP": 1,
+      "printer": 1,
+      "profile_sync": 1,
+      "proxysta": 1,
+      "psta": 1,
+      "pwrctrl": 1,
+      "qis_hide_he_features": 1,
+      "quadband": 0,
+      "re_reconnect": 1,
+      "realip": 1,
+      "reboot_schedule": 1,
+      "repeater": 1,
+      "revertfw": 0,
+      "rp_express_2g": 0,
+      "rp_express_5g": 0,
+      "rrsut": 0,
+      "rwd_mapping": 1,
+      "s46": 0,
+      "secure_default": 1,
+      "separate_ssid": 0,
+      "smart_connect": 1,
+      "ssh": 1,
+      "sta_ap_bind": 1,
+      "stainfo": 1,
+      "switchctrl": 1,
+      "tcode": 1,
+      "timemachine": 1,
+      "traffic_analyzer": 1,
+      "triband": 1,
+      "update": 1,
+      "usb3": 1,
+      "usbPortMax": 1,
+      "usbX": 1,
+      "usbX1": 1,
+      "usb_bk": 1,
+      "user_low_rssi": 1,
+      "usericon": 3,
+      "utf8_ssid": 1,
+      "vpn_fusion": 1,
+      "vpnc": 1,
+      "wanMax": 2,
+      "wanbonding": 1,
+      "web_history": 1,
+      "webdav": 1,
+      "webs_filter": 1,
+      "wifi2017": 1,
+      "wifi6e": 1,
+      "wireguard": 1,
+      "wl6": 1,
+      "wl_mfp": 1,
+      "wlband": 1,
+      "wlopmode": 0,
+      "wpa3": 1,
+      "wpa3rp": 1,
+      "wps_method_ob": 1,
+      "wrs_wbl": 1,
+      "yadns": 0
+    },
+    "label_mac": "02:00:00:00:00:01",
+    "lan_hwaddr": "02:00:00:00:00:01",
+    "memory_usage": {
+      "mem_free": "281600",
+      "mem_total": "524288",
+      "mem_used": "242688"
+    },
+    "odmpid": "",
+    "productid": "GT-AXE11000",
+    "re_mode": "1",
+    "sw_mode": "3",
+    "swpjverno": "",
+    "uptime": "Thu, 01 Jan 2026 12:00:00 +0000(43210 secs since boot)",
+    "wan_hwaddr": "",
+    "wl0_nband": "2",
+    "wl0_radio": "1",
+    "wl1_nband": "1",
+    "wl1_radio": "1",
+    "wl2_nband": "4",
+    "wl2_radio": "1",
+    "wl3_nband": "",
+    "wl_control_channel": [
+      "0",
+      "0",
+      "0"
+    ],
+    "wlc_psta": "2",
+    "wlnband_list": "2g1&#605g1&#606g1"
+  },
+  "format": 1,
+  "pages": {
+    "ajax_coretmp.asp": {
+      "curr_cpuTemp": "63.125"
+    },
+    "ajax_onboarding.asp": {
+      "get_cfg_clientlist": [
+        []
+      ],
+      "get_onboardinglist": [
+        {}
+      ],
+      "get_onboardingstatus": [
+        {
+          "cfg_obstatus": "1",
+          "cfg_re_maxnum": "9",
+          "cfg_ready": "0",
+          "cfg_recount": "0"
+        }
+      ]
+    }
+  },
+  "queries": [
+    {
+      "endpoint": "get_diag_content_data.cgi",
+      "query": {
+        "filter": "node_mac>txt>02:00:00:00:00:01>0"
+      },
+      "reply": {
+        "contents": []
+      }
+    },
+    {
+      "endpoint": "get_diag_eth_traffic.cgi",
+      "query": {
+        "is_bh": "0",
+        "node_mac": "02:00:00:00:00:01"
+      },
+      "reply": {
+        "data": {
+          "avg_rx": "0.000000",
+          "avg_tx": "0.000000",
+          "rx": "0.000000",
+          "tx": "0.000000"
+        },
+        "error_status": "200",
+        "phy": {
+          "rx": "0",
+          "tx": "0"
+        }
+      }
+    }
+  ]
+}
