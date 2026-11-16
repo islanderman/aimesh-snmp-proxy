@@ -474,6 +474,19 @@ def test_router_pin_fingerprint_and_context(cfg, router_cert):
     assert ctx.minimum_version >= ssl.TLSVersion.TLSv1_2
 
 
+def test_router_context_sets_tls_1_2_whatever_the_platform_default(cfg, monkeypatch):
+    # Many Linux builds leave minimum_version at MINIMUM_SUPPORTED by default.
+    def lax_default(protocol):
+        ctx = ssl.SSLContext(protocol)
+        ctx.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
+        return ctx
+
+    linux_like = types.SimpleNamespace(**{**vars(ssl), "SSLContext": lax_default})
+    monkeypatch.setattr(config, "ssl", linux_like)
+    ctx = load_router_pin(cfg.asus.ca_file).ssl_context()
+    assert ctx.minimum_version == ssl.TLSVersion.TLSv1_2
+
+
 def test_pinned_context_accepts_the_router(cfg, router_cert, tmp_path):
     handshake(load_router_pin(cfg.asus.ca_file).ssl_context(), router_cert, tmp_path)
 
