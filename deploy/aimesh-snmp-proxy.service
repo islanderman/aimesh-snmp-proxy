@@ -1,0 +1,78 @@
+# aimesh-snmp-proxy: serve an ASUS router and its AiMesh nodes over SNMP on 127.0.0.1.
+# install.sh fills in the prefix and the IP allow list, then copies this to /etc/systemd/system.
+# Local changes belong in a drop-in (systemctl edit), not in this file.
+
+[Unit]
+Description=ASUS router SNMP proxy for LibreNMS
+After=network-online.target
+Wants=network-online.target
+# A crash loop must not hammer the router login: stop after 5 starts in 15 minutes.
+StartLimitIntervalSec=900
+StartLimitBurst=5
+
+[Service]
+Type=exec
+# -I ignores PYTHON* variables and the working directory. systemd fills in the
+# credentials directory; --config must come before the command, or the CLI drops it.
+ExecStart=@PREFIX@/venv/bin/python -I -B -u -m aimesh_snmp_proxy --config ${CREDENTIALS_DIRECTORY}/config.toml run
+# Exit 78 is a config error: restarting cannot fix it, so systemd must not retry.
+Restart=on-failure
+RestartSec=60
+RestartPreventExitStatus=78
+# SIGTERM logs out of the router and saves the counters.
+TimeoutStopSec=30
+SyslogIdentifier=aimesh-snmp-proxy
+
+# Unprivileged throwaway user (never root, never librenms). /etc/aimesh-snmp-proxy is
+# root-only, so the service gets its files as credentials: no secret in env or argv.
+# Needs systemd >= 247; install.sh writes a static-user variant for older systemd.
+DynamicUser=yes
+StateDirectory=aimesh-snmp-proxy
+StateDirectoryMode=0700
+# Optional from systemd 250: LoadCredentialEncrypted= keeps these files encrypted at rest.
+LoadCredential=config.toml:/etc/aimesh-snmp-proxy/config.toml
+LoadCredential=asus_password:/etc/aimesh-snmp-proxy/asus_password
+LoadCredential=snmp_community:/etc/aimesh-snmp-proxy/snmp_community
+LoadCredential=asus_router.pem:/etc/aimesh-snmp-proxy/asus_router.pem
+
+# Only loopback and the router may be reached. install.sh sets the list from asus.host
+# (plus nodes.expected when collector.mode is per_node); the proxy never resolves names.
+IPAddressDeny=any
+IPAddressAllow=@IP_ALLOW@
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# Sandbox. Binding ports above 1023 needs no capability.
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RemoveIPC=yes
+UMask=0077
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+# No locked wheel maps W+X memory (static ELF scan); never run under this filter, and
+# Python 3.14 is unverified. If the service dies at start with an mprotect or SIGSYS
+# error, set it to no in a drop-in.
+MemoryDenyWriteExecute=yes
+
+# Contain a runaway process: this host also runs LibreNMS.
+MemoryMax=512M
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target
