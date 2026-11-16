@@ -36,9 +36,16 @@ EXIT_CONFIG = 78  # sysexits EX_CONFIG; systemd RestartPreventExitStatus=78 skip
 Handler = Callable[[Config | None, list[str]], int]
 # These run without a config file unless one is named; their handler gets None.
 CONFIG_OPTIONAL = frozenset({"dump-snmprec"})
+# These write a config and never read one; their handler gets None.
+CONFIG_FREE = frozenset({"init"})
 
 # command -> (module, handler, help); the handler parses its own options.
 COMMANDS: dict[str, tuple[str, str, str]] = {
+    "init": (
+        "aimesh_snmp_proxy.ops.configure",
+        "cli_init",
+        "write a config and its secret files for one router",
+    ),
     "run": ("aimesh_snmp_proxy.ops", "cli_run", "poll the router and serve SNMP"),
     "dump-snmprec": (
         "aimesh_snmp_proxy.profiles",
@@ -218,6 +225,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if handler is None:
         print(f"{args.command}: not implemented yet", file=sys.stderr)
         return EXIT_NOT_IMPLEMENTED
+    if args.command in CONFIG_FREE:
+        if getattr(args, "config", None) is not None:
+            parser.error(f"{args.command} reads no config: use --output-dir")
+        setup_logging("WARNING")
+        return handler(None, rest)
     if path is None and args.command not in CONFIG_OPTIONAL:
         path = DEFAULT_CONFIG
     cfg = None

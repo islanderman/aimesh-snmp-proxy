@@ -272,6 +272,7 @@ def test_a_command_is_required(capsys):
 def test_lazy_commands_map_to_their_packages():
     modules = {command: module for command, (module, _, _) in cli.COMMANDS.items()}
     assert modules == {
+        "init": "aimesh_snmp_proxy.ops.configure",
         "run": "aimesh_snmp_proxy.ops",
         "selftest": "aimesh_snmp_proxy.ops",
         "onboard": "aimesh_snmp_proxy.ops",
