@@ -22,6 +22,8 @@ ROOT = Path(__file__).resolve().parents[2]
 DOCS_DIR = ROOT / "docs"
 CONFIG_SOURCE = ROOT / "src" / "aimesh_snmp_proxy" / "config.py"
 INSTALLER = ROOT / "deploy" / "install.sh"
+EXAMPLE_CONFIG = ROOT / "config.example.toml"
+MAX_README_LINES = 150  # an entry page: the details live in docs/
 BASH = shutil.which("bash") or "/bin/bash"
 # The include pages hold one line each: their text lives in the root file.
 PAGES = [
@@ -274,3 +276,34 @@ def test_the_onboard_hostname_values_are_the_ones_the_config_accepts():
     assert set(config.ONBOARD_HOSTNAMES) == {"sysname", "ip"}
     text = read(DOCS_DIR / "instances.md")
     assert 'hostname = "ip"' in text
+
+
+def test_the_readme_stays_an_entry_page():
+    assert len(read(ROOT / "README.md").splitlines()) <= MAX_README_LINES
+
+
+def test_the_fallback_flag_exists_in_the_onboard_parser():
+    onboard = importlib.import_module("aimesh_snmp_proxy.ops.onboard")
+    assert onboard._parser().parse_args(["--allow-http"]).allow_http
+
+
+def test_the_onboard_example_matches_the_example_config():
+    text, example = read(DOCS_DIR / "librenms.md"), read(EXAMPLE_CONFIG)
+    for line in (
+        'url = "https://192.168.50.10"',
+        'token_file = "librenms_token"',
+        'ca_file = "librenms.pem"',
+    ):
+        assert line in text, line
+        assert f"# {line}" in example, line
+
+
+def test_the_documented_router_port_is_the_example_port():
+    assert tomllib.loads(read(EXAMPLE_CONFIG))["asus"]["port"] == 8443
+    assert "8443" in read(DOCS_DIR / "installation.md")
+
+
+@pytest.mark.parametrize("page", PAGES, ids=names)
+def test_the_docs_avoid_sudoedit(page):
+    # sudo-rs may lack it: the docs use `systemctl edit` for drop-ins.
+    assert "sudoedit" not in read(page), names(page)
