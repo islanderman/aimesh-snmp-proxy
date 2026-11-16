@@ -23,11 +23,11 @@ APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
 sudo $APP init --detect
 ```
 
-`init` asks a few questions. Each shows its default in brackets, and Enter takes it. The questions
-are the instance name (leave it empty), the router address, the HTTPS port, the admin user, the
-router type (`auto` is right), the name that LibreNMS shows, the SNMP port base, and the LibreNMS
-address (optional). It asks for the admin password last, and the prompt does not echo. See
-[`init`](../reference/cli.md#init) for every flag.
+`init` asks a few questions. Each shows its default in brackets, and Enter takes it. First it asks
+for the instance name (leave it empty), the router address, the HTTPS port, and the admin user. Then
+it asks for the router type (`auto` is right), the name that LibreNMS shows, the SNMP port base, and
+the LibreNMS address (optional). It asks for the admin password last, and the prompt does not echo.
+See [`init`](../reference/cli.md#init) for every flag.
 
 With `--detect`, `init` then fetches the root certificate and prints its SHA-256 fingerprint.
 Compare it with the one your browser shows for `https://192.168.50.1:8443`. Type `yes` only if they
@@ -60,9 +60,9 @@ sudo ./deploy/install.sh
 
 ## 5. Optional: serve per-node detail
 
-With the default mode `root_only`, a node shows what the root knows about it: model, radios,
-clients, ports, backhaul, and traffic rates, plus one CPU row and a memory percentage. Its uptime
-counts from the moment the proxy began to serve it.
+With the default mode `root_only`, a node shows what the root knows about it. That is the model,
+radios, clients, ports, backhaul, and traffic rates, plus one CPU row and a memory percentage. Its
+uptime counts from the moment the proxy began to serve it.
 
 Switch to `per_node` for the real uptime, temperatures, per-core CPU, RAM, channel frequency, and
 exact traffic counters of each node. The proxy then logs in to every node too, and each node has its
@@ -81,10 +81,10 @@ sudo $APP check-config
 sudo $APP selftest
 ```
 
-`discover` prints one row for each device. The columns are the served name, the SNMP port, the model
-and firmware, the LAN address, the end of the MAC address, the online state, the AiMesh level, and
-the backhaul to the parent. The port is a preview. The service pins the real port in `ports.json` at
-its first start.
+`discover` prints one row for each device. The first columns are the served name, the SNMP port, the
+model, the firmware, and the LAN address. The last columns are the end of the MAC address, the online
+state, the AiMesh level, and the backhaul to the parent. The port is a preview. The service pins the
+real port in `ports.json` at its first start.
 
 ```text
 role    sys_name       port   model       firmware  ip             mac_tail  online  level  backhaul
