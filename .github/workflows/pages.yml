@@ -1,7 +1,6 @@
 name: Pages
 
 on:
-  # The paths leave out this file: it can land before docs/ and mkdocs.yml exist.
   push:
     branches: [main]
     paths:
@@ -11,6 +10,7 @@ on:
       - CHANGELOG.md
       - CONTRIBUTING.md
       - config.example.toml
+      - .github/workflows/pages.yml
   # A pull request only builds the site, so a broken page fails before it reaches main.
   pull_request:
     paths:
@@ -20,6 +20,7 @@ on:
       - CHANGELOG.md
       - CONTRIBUTING.md
       - config.example.toml
+      - .github/workflows/pages.yml
   workflow_dispatch:
 
 permissions:
@@ -34,6 +35,8 @@ jobs:
     name: Build the site
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    outputs:
+      found: ${{ steps.docs.outputs.found }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,21 +45,35 @@ jobs:
         with:
           version: '0.9.28'
           enable-cache: false
+      # Before the docs project lands there is no site to build, and that is not a failure.
+      - id: docs
+        name: Look for the docs project
+        run: |
+          if [ -f mkdocs.yml ]; then
+            echo 'found=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'found=false' >> "$GITHUB_OUTPUT"
+            echo 'No mkdocs.yml yet: nothing to build.'
+          fi
       - name: Install the docs tools from the hash-pinned list
+        if: steps.docs.outputs.found == 'true'
         run: |
           uv venv --python 3.12 .venv-docs
           uv pip install --python .venv-docs/bin/python --require-hashes -r docs/requirements.txt
       - name: Build the site and fail on any warning
+        if: steps.docs.outputs.found == 'true'
         run: .venv-docs/bin/mkdocs build --strict --site-dir site
       - name: Package the site
-        if: github.event_name != 'pull_request'
+        if: steps.docs.outputs.found == 'true' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
 
   deploy:
     name: Deploy to GitHub Pages
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: >-
+      needs.build.outputs.found == 'true' && github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 10
