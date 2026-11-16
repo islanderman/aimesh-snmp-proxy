@@ -827,3 +827,91 @@ def test_no_free_port_base_left():
     bases = {Path(str(b)): b for b in range(16101, 65281, 100)}
     with pytest.raises(configure.InitError, match="--port-base"):
         configure.free_port_base(bases)
+
+
+# --- install.sh's seed ----------------------------------------------------------------
+
+EXAMPLE = Path(__file__).resolve().parents[2] / "config.example.toml"
+
+
+def seed_folder(folder, instance=None):
+    """What install.sh leaves behind: its seeded config.toml, empty secret files."""
+    text = EXAMPLE.read_text()
+    if instance:
+        line = 'state_dir = "/var/lib/aimesh-snmp-proxy"\n'
+        assert line in text
+        text = text.replace(
+            line, f'state_dir = "/var/lib/aimesh-snmp-proxy-{instance}"\n'
+        )
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "config.toml").write_text(text)
+    for name in ("asus_password", "snmp_community", "asus_router.pem"):
+        (folder / name).touch(mode=0o600)
+
+
+def test_the_seed_digest_matches_the_example():
+    digest = configure.seed_digest(EXAMPLE.read_text())
+    assert digest in configure.SEED_DIGESTS, (
+        f"config.example.toml changed: add {digest} to configure.SEED_DIGESTS"
+    )
+
+
+def test_an_untouched_install_sh_seed_is_replaced_without_force(init, paths):
+    etc = paths / "etc"
+    seed_folder(etc)
+    result = init(flags(etc))
+    assert result.code == 0, result.err
+    placeholders = "asus_password, snmp_community, config.toml"
+    assert f"replaced install.sh's placeholders: {placeholders}" in result.out
+    assert "\nreplaced:" not in result.out
+    assert "LibreNMS" not in result.err  # no old community to update
+    assert load(etc).asus.host == HOST
+    assert (etc / "asus_router.pem").read_text() == ""  # left for discover --pin-cert
+
+
+def test_an_untouched_instance_seed_is_replaced_without_force(init, paths):
+    seed_folder(paths / "etc" / "lab", "lab")
+    result = init(["--host", HOST, "--password-stdin", "--instance", "lab"])
+    assert result.code == 0, result.err
+    assert load(paths / "etc" / "lab").state_dir == Path(f"{paths / 'state'}-lab")
+
+
+def test_a_seed_for_another_instance_is_kept(init, paths):
+    seed_folder(paths / "etc" / "lab", "other")
+    result = init(["--host", HOST, "--password-stdin", "--instance", "lab"])
+    assert result.code == 1
+    assert "config.toml" in result.err
+
+
+@pytest.mark.parametrize(
+    ("name", "body"),
+    [("config.toml", None), ("asus_password", "filled in\n")],
+)
+def test_a_touched_seed_still_needs_force(init, paths, name, body):
+    etc = paths / "etc"
+    seed_folder(etc)
+    path = etc / name
+    path.write_text(body if body is not None else path.read_text() + "# my note\n")
+    result = init(flags(etc))
+    assert result.code == 1
+    assert f"already holds {name}" in result.err
+    assert "--force" in result.err
+
+
+def test_a_link_to_an_empty_file_is_no_placeholder(init, paths):
+    etc = paths / "etc"
+    etc.mkdir()
+    (paths / "empty").touch()
+    (etc / "asus_password").symlink_to(paths / "empty")
+    result = init(flags(etc))
+    assert result.code == 1
+    assert "asus_password" in result.err
+
+
+def test_a_config_that_is_no_text_is_no_placeholder(init, paths):
+    etc = paths / "etc"
+    etc.mkdir()
+    (etc / "config.toml").write_bytes(b"\xff\xfe not utf-8\n")
+    result = init(flags(etc))
+    assert result.code == 1
+    assert "already holds config.toml" in result.err
