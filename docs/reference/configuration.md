@@ -122,12 +122,12 @@ expected = ["192.168.50.11-14", "192.168.50.20"] # a string works too: "192.168.
 The SNMP side. Set `community_file`, or add `[snmp.v3]`, or both. With neither, the proxy refuses
 to start: `snmp: set community_file (v2c) or add [snmp.v3]`.
 
-| Key              | Type    | Default          | Allowed values                       | Purpose                                 |
-| ---------------- | ------- | ---------------- | ------------------------------------ | --------------------------------------- |
-| `bind`           | string  | `127.0.0.1`      | `127.0.0.1`                          | Address that the SNMP engines listen on |
-| `port_base`      | integer | `16101`          | 1024 to 65280                        | UDP port of the root device             |
-| `profile`        | string  | `asuswrt-merlin` | lower-case name, up to 32 characters | MIB profile that renders the answers    |
-| `community_file` | path    | none             | file name or path                    | File that holds the SNMP v2c community  |
+| Key              | Type    | Default          | Allowed values                                                     | Purpose                                 |
+| ---------------- | ------- | ---------------- | ------------------------------------------------------------------ | --------------------------------------- |
+| `bind`           | string  | `127.0.0.1`      | `127.0.0.1`                                                        | Address that the SNMP engines listen on |
+| `port_base`      | integer | `16101`          | 1024 to 65280                                                      | UDP port of the root device             |
+| `profile`        | string  | `asuswrt-merlin` | 1 to 32 characters from `a-z0-9_-`; the first is a letter or digit | MIB profile that renders the answers    |
+| `community_file` | path    | none             | file name or path                                                  | File that holds the SNMP v2c community  |
 
 - `bind`: the proxy serves SNMP on the loopback address only. Any other value is an error.
 - `profile`: `asuswrt-merlin` is the only profile. Any other name passes `check-config`, but then no
@@ -196,14 +196,15 @@ How the proxy polls the router.
 | `topology_interval_s` | number | `300`       | above 0                                   | Seconds between reads of the node list and detail    |
 | `request_timeout_s`   | number | `10`        | above 0                                   | Timeout of one router request, in seconds            |
 
-- The proxy adds up to 10 percent of jitter to each interval.
+- Each interval varies at random by plus or minus 10 percent.
 - `stale_after_s`: when a node's newest data is older than this, the node stops answering SNMP.
   LibreNMS then sees the device as down. The proxy never serves old data as if it were new. The
   same limit caps the gap that one counter sample may cover. See
   [Counter sources](metrics.md#counter-sources).
 - `metrics_interval_s`: also the interval of the client list and the Ethernet port status.
 - `topology_interval_s`: also the interval of the device detail: uptime, CPU cores, RAM, temperatures,
-  and channels.
+  and channels. Keep it at 540 or less. The proxy drops detail that is older than 600 seconds, and
+  each interval varies by 10 percent, so a longer interval lets the detail lapse between two polls.
 
 ```toml
 [collector]
@@ -280,15 +281,15 @@ hostname = "sysname"
 An override changes one node. Write one `[[override]]` table for each node, and none for the nodes
 you leave as they are. Environment variables cannot set overrides.
 
-| Key        | Type    | Default        | Allowed values                         | Purpose                                             |
-| ---------- | ------- | -------------- | -------------------------------------- | --------------------------------------------------- |
-| `match`    | string  | none, required | IPv4 address or MAC address            | The node to change                                  |
-| `sys_name` | string  | derived        | 1 to 63 characters from `A-Za-z0-9._-` | Name that the node serves as sysName                |
-| `port`     | integer | derived        | `port_base` + 1 to `port_base` + 255   | Pins the node to one SNMP port                      |
-| `login`    | boolean | `true`         | `true`, `false`                        | `false` skips the `per_node` login for this node    |
-| `location` | string  | none           | up to 255 characters                   | The sysLocation that the node serves                |
-| `exclude`  | boolean | `false`        | `true`, `false`                        | `true` leaves the node out; no other key may follow |
-| `ca_file`  | path    | none           | PEM file                               | The node's own certificate, for `per_node`          |
+| Key        | Type    | Default        | Allowed values                                                         | Purpose                                             |
+| ---------- | ------- | -------------- | ---------------------------------------------------------------------- | --------------------------------------------------- |
+| `match`    | string  | none, required | IPv4 address or MAC address                                            | The node to change                                  |
+| `sys_name` | string  | derived        | 1 to 63 characters from `A-Za-z0-9._-`; the first is a letter or digit | Name that the node serves as sysName                |
+| `port`     | integer | derived        | `port_base` + 1 to `port_base` + 255                                   | Pins the node to one SNMP port                      |
+| `login`    | boolean | `true`         | `true`, `false`                                                        | `false` skips the `per_node` login for this node    |
+| `location` | string  | none           | up to 255 characters                                                   | The sysLocation that the node serves                |
+| `exclude`  | boolean | `false`        | `true`, `false`                                                        | `true` leaves the node out; no other key may follow |
+| `ca_file`  | path    | none           | PEM file                                                               | The node's own certificate, for `per_node`          |
 
 - `match`: a MAC address survives a change of DHCP lease; an IP address does not. A MAC matches
   with colons, hyphens, or no separator. The MAC match wins over an IP match.
@@ -486,18 +487,29 @@ The proxy writes these files to `state_dir`. Keep the folder when you upgrade.
 | ---------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------- |
 | `ports.json`                 | `run`             | The SNMP port index of each node MAC. LibreNMS devices point at these ports.                               |
 | `counters.json`              | `run`             | The derived octet counters, so they never go backwards. Saved every 60 seconds.                            |
-| `lockout.json`               | `run`             | The router login budget, backoff, and latches. It holds a salted hash of the password, never the password. |
+| `lockout.json`               | `run`, `discover` | The router login budget, backoff, and latches. It holds a salted hash of the password, never the password. |
 | `onboarded.json`             | `onboard --apply` | The LibreNMS devices that `onboard` created. `onboard --remove` deletes only these.                        |
 | `__pysnmp/<engine id>/boots` | `run`             | The SNMPv3 boot counter of each node engine                                                                |
 
 - Each write goes to a temp file first, then replaces the old file. A crash leaves the old file or
   the new one, never half of one. State files get mode `0600`.
-- `ports.json` is JSON: `{"version": 1, "next_index": 3, "nodes": {"00:00:5e:00:53:11": 1}}`. If it
-  is damaged, the proxy refuses to start and prints a `state error:` line. A node outside
-  `nodes.expected` may get a new port after you move the file aside.
+- `ports.json` is JSON: `{"version": 1, "next_index": 3, "nodes": {"00:00:5e:00:53:11": 1}}`. A node
+  outside `nodes.expected` may get a new port after you move a damaged file aside.
+- `ports.json` and `onboarded.json` fail closed. A damaged file, or one with an unknown format,
+  stops the command and stays as it is, so that you can fix it or move it aside. `check-config`
+  prints a `state error:` line for `ports.json`, and `run` exits with 78.
+- `counters.json` and `lockout.json` start empty instead. A file that is not valid JSON is renamed
+  to `NAME.corrupt` and logged. A file with an unknown format is overwritten. An empty
+  `counters.json` restarts the counters at 0. An empty `lockout.json` forgets the login budget and
+  the latches.
+- `discover` writes `lockout.json` when it logs in: the list, `--fixtures`, and `--node` with a MAC.
+  It counts toward the budget of 6 logins in one hour, and it creates `state_dir` if the folder is
+  missing. `selftest` works on a scratch copy and writes nothing. `check-config` never contacts the
+  router.
 - `lockout.json` holds a router refusal across restarts. Fix the cause, then send SIGHUP to clear
-  the latch. A latch for bad credentials clears itself when the password changes. Restart the
-  service after you edit the password file, because the unit holds a copy of it. See
+  the latch. A latch for bad credentials also clears when the password changes. A change of
+  `asus.username` alone does not clear it: restart the service, then send SIGHUP. Restart after you
+  edit the password file, because the unit holds a copy of it. See
   [Troubleshooting](../troubleshooting.md).
 
 ## Instances
