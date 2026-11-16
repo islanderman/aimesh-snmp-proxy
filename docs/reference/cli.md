@@ -264,8 +264,8 @@ FAIL: 2 of 3 nodes serve
 | `OIDS`   | The number of OIDs in that walk. The LLDP rows are not in it         |
 
 The `wireless omitted` line says why LibreNMS does not create a sensor. The reason is one of
-`missing`, `channel unknown`, `no clients`, `rate unknown`, `N of 6 values`, or `never served`. See
-[Clients per band](metrics.md#clients-per-band).
+`missing`, `channel unknown`, `no clients`, `rate unknown`, `N of 6 values`, `never served`, or
+`no interfaces extend`. See [Clients per band](metrics.md#clients-per-band).
 
 Exit codes: `0` only when every node serves and no expected node is missing from the AiMesh list.
 `1` when a node fails, an expected node is absent, or the router gives no list (`FAIL: ...` is the last
@@ -510,7 +510,7 @@ flag gave. Without a terminal, `--host` and `--password-stdin` are required.
 | `--detect`           | off                                                                 | Pins the router certificate, then logs in once to tell an AiMesh root from a standalone device                    |
 | `--yes`              | off                                                                 | With `--detect`: pins the certificate without asking                                                              |
 | `--dry-run`          | off                                                                 | Checks the answers and prints the result. Writes nothing                                                          |
-| `--force`            | off                                                                 | Replaces files that exist                                                                                         |
+| `--force`            | off                                                                 | Replaces files that hold data. The installer's untouched placeholders need no `--force`                           |
 
 These flag combinations are usage errors: `--yes` without `--detect`, `--detect` with `--nodes`,
 `--mode standalone` with `--nodes`, and `--librenms-ca` without `--librenms-url`.
@@ -530,10 +530,12 @@ These flag combinations are usage errors: `--yes` without `--detect`, `--detect`
 - `init` writes with umask `077`. Each file is written in one step, and `config.toml` goes last,
   because it names the others.
 - It checks the new config with the loader of `check-config` before it writes anything.
-- It replaces no file without `--force`. A forced run prints `replaced: ...`, and it makes a new SNMP
-  community, so LibreNMS devices that you added before need the new one.
-- The installer seeds `config.toml` and empty secret files. Run `init` before the installer, with
-  `scripts/generate-config.sh` from a source checkout, or run `init --force` after it.
+- It replaces no file that holds data without `--force`. A forced run prints `replaced: ...`, and it
+  makes a new SNMP community, so LibreNMS devices that you added before need the new one.
+- What the installer seeds needs no `--force`: a `config.toml` that is still exactly the installer's
+  copy of `config.example.toml` (for an instance, with its own `state_dir` line), and empty files.
+  `init` replaces them and prints `replaced install.sh's placeholders: ...`. A config that you
+  edited, or a secret file that you filled in, still needs `--force`.
 - `--librenms-url` does not create `librenms_token`. Put the API token there before you run
   `onboard`.
 - With `--instance`, `init` sets `state_dir` to `/var/lib/aimesh-snmp-proxy-NAME`. It reads the main
@@ -676,10 +678,10 @@ dry run: nothing written. /etc/aimesh-snmp-proxy would get:
 config ok: check-config's loader accepts it
 ```
 
-When a file exists, `init` stops and names the files:
+When a file holds data, `init` stops and names the files:
 
 ```text
-init: /etc/aimesh-snmp-proxy/lab already holds config.toml, asus_password, snmp_community: pass --force to replace (install.sh seeds config.toml and empty secret files)
+init: /etc/aimesh-snmp-proxy/lab already holds config.toml, asus_password, snmp_community: pass --force to replace
 ```
 
 ### The wrapper script
@@ -698,8 +700,8 @@ It exits with 127 when it finds none. Otherwise it exits with the code of `init`
 ### Exit codes of `init`
 
 - `0` when the files are written, or the dry run passes.
-- `1` when `init` refuses or fails: a file exists and you gave no `--force`, a file or folder cannot be
-  read or written, you declined the pin, the router is unreachable or refuses the login, or a
+- `1` when `init` refuses or fails: a file that holds data exists and you gave no `--force`, a file or
+  folder cannot be read or written, you declined the pin, the router is unreachable or refuses the login, or a
   config of another service cannot be read and you gave no `--port-base`.
 - `2` on a usage error: a bad or conflicting flag, no `--host` or no password source without a
   terminal, a bad password, no valid answer, or input that ends at a question.

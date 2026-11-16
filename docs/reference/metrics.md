@@ -15,7 +15,9 @@ AiMesh node, a standalone router, an access point, and a media bridge.
 - The view covers the subtree `1.3.6` and the LLDP-MIB subtree `1.0.8802.1.1.2`.
 - Unknown data omits its OID. The proxy never invents a value. The only stand-ins are the standard
   "unknown" codes: `ifSpeed` 0 and `ifOperStatus` unknown(4).
-- The proxy serves no UCD-SNMP-MIB, no packet, error, or discard counters, and no SNR or noise floor.
+- The proxy serves no UCD-SNMP-MIB tables, such as `laLoad` or `memTotalReal`. The only OID under
+  `1.3.6.1.4.1.2021` is the `ASUSWRT-Merlin` string below.
+- The proxy serves no packet, error, or discard counters, and no SNR or noise floor.
 
 LibreNMS picks the `asuswrt-merlin` OS from two OIDs:
 
