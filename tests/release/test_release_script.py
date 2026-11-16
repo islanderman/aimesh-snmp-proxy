@@ -339,11 +339,15 @@ def test_prepare_ignores_a_file_that_git_ignores(sandbox: Sandbox) -> None:
     prepare(sandbox)
 
 
-def test_prepare_refuses_another_git_identity(sandbox: Sandbox) -> None:
-    sandbox.git("config", "user.email", "someone@example.com")
-    done = sandbox.release("0.3.0")
+def test_prepare_refuses_a_repository_without_an_identity_of_its_own(
+    sandbox: Sandbox, tmp_path: Path
+) -> None:
+    other = tmp_path / "other.gitconfig"
+    other.write_text("[user]\n\tname = Someone\n\temail = someone@example.com\n")
+    sandbox.git("config", "--unset", "user.email")
+    done = sandbox.release("0.3.0", GIT_CONFIG_GLOBAL=str(other))
     assert done.returncode != 0
-    assert f"git author email is 'someone@example.com', expected {EMAIL}" in done.stderr
+    assert "this repository has no user.email of its own" in done.stderr
     assert sandbox.git("branch", "--list", "release/*") == ""
 
 
@@ -354,13 +358,18 @@ def test_prepare_refuses_an_identity_set_by_the_environment(
     done = sandbox.release("0.3.0", **{f"GIT_{role}_EMAIL": "someone@example.com"})
     assert done.returncode != 0
     assert f"git {role.lower()} email is 'someone@example.com'" in done.stderr
+    assert f"but this repository's user.email is {EMAIL}" in done.stderr
+    assert sandbox.git("branch", "--list", "release/*") == ""
 
 
-def test_prepare_has_no_override_for_the_maintainer_email(sandbox: Sandbox) -> None:
+def test_prepare_lets_another_maintainer_release_with_their_own_identity(
+    sandbox: Sandbox,
+) -> None:
+    sandbox.git("config", "user.name", "Someone")
     sandbox.git("config", "user.email", "someone@example.com")
-    done = sandbox.release("0.3.0", RELEASE_MAINTAINER_EMAIL="someone@example.com")
-    assert done.returncode != 0
-    assert f"expected {EMAIL}" in done.stderr
+    prepare(sandbox)
+    fields = sandbox.git("log", "-1", "--format=%an|%ae|%cn|%ce")
+    assert fields == "Someone|someone@example.com|Someone|someone@example.com"
 
 
 def test_prepare_rejects_a_malformed_release_date(sandbox: Sandbox) -> None:
@@ -513,10 +522,9 @@ def test_tag_refuses_when_the_tag_exists(sandbox: Sandbox) -> None:
 def test_tag_refuses_another_git_identity(sandbox: Sandbox) -> None:
     prepare(sandbox)
     sandbox.merge_release("0.3.0")
-    sandbox.git("config", "user.email", "someone@example.com")
-    done = sandbox.release("--tag", "0.3.0")
+    done = sandbox.release("--tag", "0.3.0", GIT_COMMITTER_EMAIL="someone@example.com")
     assert done.returncode != 0
-    assert "git author email is 'someone@example.com'" in done.stderr
+    assert "git committer email is 'someone@example.com'" in done.stderr
     assert sandbox.git("tag", "--list", "v0.3.0", cwd=sandbox.origin) == ""
 
 
@@ -701,8 +709,7 @@ def test_dry_run_prepare_changes_nothing_and_shows_the_plan(
 
 
 def test_dry_run_prepare_still_runs_every_check(sandbox: Sandbox) -> None:
-    sandbox.git("config", "user.email", "someone@example.com")
-    done = sandbox.release("0.3.0", "--dry-run")
+    done = sandbox.release("0.3.0", "--dry-run", GIT_AUTHOR_EMAIL="someone@example.com")
     assert done.returncode != 0
     assert "git author email is 'someone@example.com'" in done.stderr
 

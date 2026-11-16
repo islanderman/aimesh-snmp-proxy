@@ -9,7 +9,6 @@ set -euo pipefail
 
 REMOTE=origin
 MAIN=main
-MAINTAINER=jerry@chenyang.us
 PACKAGE=aimesh-snmp-proxy
 PYPROJECT=pyproject.toml
 LOCKFILE=uv.lock
@@ -29,6 +28,7 @@ usage: scripts/release.sh [--dry-run] X.Y.Z        open the release PR
        scripts/release.sh --notes X.Y.Z            print the changelog notes of one version
 
 --dry-run runs every check, prints the plan, and changes nothing.
+The release commit and the tag use this repository's own user.name and user.email.
 The GitHub CLI reads its login, or GH_TOKEN and GH_HOST, as usual.
 EOF
 }
@@ -65,13 +65,17 @@ ident_email() { # ident_email author|committer: the email git would record
   printf '%s' "${ident%%>*}"
 }
 
-# The release commit and the tag take both identities from git, config and environment alike.
+# The release commit and the tag must carry this repository's own identity, not a global one.
+# Git takes the author and the committer from config and environment alike, so check both.
 check_identity() {
-  local role email
+  local own role email
+  own=$(git config --local user.email 2>/dev/null || true)
+  [ -n "$own" ] ||
+    die "this repository has no user.email of its own: run git config user.email you@example.com"
   for role in author committer; do
     email=$(ident_email "$role")
-    [ "$email" = "$MAINTAINER" ] ||
-      die "git $role email is '${email:-unset}', expected $MAINTAINER"
+    [ "$email" = "$own" ] ||
+      die "git $role email is '${email:-unset}', but this repository's user.email is $own"
   done
 }
 
