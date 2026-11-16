@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke-test the release files: build the sdist, the wheel and the offline bundle, install the
+# Smoke-test the release files: build the sdist, the wheel and the install bundle, install the
 # bundle into a fresh venv, then run the CLI against its config.example.toml.
 # Needs uv, git, tar and network access (PyPI, GitHub). Everything lands in one temp directory.
 set -euo pipefail
@@ -16,7 +16,7 @@ usage() {
   cat <<'EOF'
 Usage: scripts/smoke-test.sh [--python VERSION] [--keep]
 
-Build the sdist, the wheel and the offline bundle from this checkout, check the bundle
+Build the sdist, the wheel and the install bundle from this checkout, check the bundle
 checksums, install the bundle into a fresh venv, and run the CLI against the bundled
 config.example.toml with throwaway secrets. Needs uv, git, tar and network access.
 
@@ -174,7 +174,7 @@ main() {
 
   say "build: sdist and wheel"
   quiet "uv build" uv build --python "$PYTHON" --out-dir "$dist" "$ROOT"
-  say "build: offline bundle (commit $(git -C "$ROOT" rev-parse --short HEAD))"
+  say "build: install bundle (commit $(git -C "$ROOT" rev-parse --short HEAD))"
   quiet "deploy/build-bundle.sh" "$ROOT/deploy/build-bundle.sh" --out-dir "$dist"
 
   shopt -s nullglob

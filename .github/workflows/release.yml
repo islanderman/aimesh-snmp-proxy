@@ -36,7 +36,7 @@ jobs:
         run: scripts/release.sh --notes "${GITHUB_REF_NAME#v}" > release-notes.md
       - name: Build the sdist and the wheel
         run: uv build --out-dir dist
-      - name: Build the offline bundle
+      - name: Build the install bundle
         run: deploy/build-bundle.sh --out-dir dist
       - name: Write SHA256SUMS
         working-directory: dist
