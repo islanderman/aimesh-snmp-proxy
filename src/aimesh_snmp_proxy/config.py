@@ -794,6 +794,8 @@ class RouterPin:
         address: trust comes from the pin. Callers must never fall back to HTTP.
         """
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        # Explicit: some builds (many Linux ones) default to MINIMUM_SUPPORTED.
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
         ctx.check_hostname = self.check_hostname
         ctx.verify_mode = ssl.CERT_REQUIRED
         if not self.check_hostname:  # the exported leaf itself is the anchor
