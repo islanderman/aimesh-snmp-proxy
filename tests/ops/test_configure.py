@@ -683,6 +683,19 @@ def test_next_steps_walk_through_the_onboarding(init, paths):
     assert f"-c {paths / 'etc' / 'config.toml'}" in steps
 
 
+def test_next_steps_without_librenms_add_onboard_by_hand(init, paths):
+    etc = paths / "etc"
+    result = init(flags(etc))
+    assert result.code == 0, result.err
+    step = result.out.split("Next steps")[1].splitlines()[-1]
+    # A second init would refuse the real files, or with --force draw a new community.
+    assert "re-run init" not in step
+    assert f"add [onboard] to {etc / 'config.toml'} by hand" in step
+    assert 'token_file = "librenms_token"' in step
+    assert f"put a LibreNMS API token in {etc / 'librenms_token'} (0600)" in step
+    assert step.endswith("onboard --apply")
+
+
 def test_render_config_is_valid_toml_for_every_mode(paths):
     import tomllib
 
