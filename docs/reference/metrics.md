@@ -74,7 +74,8 @@ Uptime comes from one of two sources:
 
 The proxy drops the device detail that it cannot refresh for 10 minutes: uptime, CPU cores, RAM size,
 temperatures, and channels. `sysUpTime` then counts from the start of serving until the next poll
-succeeds.
+succeeds. Keep `collector.topology_interval_s` at 540 or less, or the detail lapses between two
+polls.
 
 ## CPU and memory
 
@@ -87,7 +88,9 @@ succeeds.
 
 - A device that reports its CPU cores serves one row for each core. Core load needs two samples of
   the device detail, so it appears from the second detail poll on (`collector.topology_interval_s`
-  apart).
+  apart). After a restart, the cores of the root appear about one interval after the first poll.
+  The cores of a `per_node` node appear up to two intervals after the start, because the first
+  detail poll of each node comes at its own time within the first interval.
 - Without core data, the device serves one row, `CPU`, with the total percent that the router
   reports.
 - With the RAM size and the used bytes, the storage row is `Physical memory`: unit 1024 bytes, size and

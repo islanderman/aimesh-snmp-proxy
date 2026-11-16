@@ -15,15 +15,15 @@ sudo $APP -c /etc/aimesh-snmp-proxy/config.toml check-config
 aimesh-snmp-proxy [-h] [--version] [-c CONFIG] COMMAND [options]
 ```
 
-| Command                         | Purpose                                                         | Logs in to the router                        | Writes                  |
-| ------------------------------- | --------------------------------------------------------------- | -------------------------------------------- | ----------------------- |
-| [`init`](#init)                 | Writes a first config file and its secret files                 | only with `--detect`                         | The config folder       |
-| [`discover`](#discover)         | Lists the nodes, pins certificates, captures fixtures           | for the list, `--fixtures`, and `--node MAC` | A pin file or a fixture |
-| [`check-config`](#check-config) | Checks the config, the secret files, the pins, and `ports.json` | no                                           | nothing                 |
-| [`selftest`](#selftest)         | Polls the router once, then asks each node over SNMP            | yes, read-only                               | nothing                 |
-| [`run`](#run)                   | The service: polls the router and serves SNMP                   | yes                                          | The state files         |
-| [`onboard`](#onboard)           | Adds the devices to LibreNMS, or removes them                   | no                                           | `onboarded.json`        |
-| [`dump-snmprec`](#dump-snmprec) | Prints the OIDs that a snapshot file renders                    | no                                           | nothing                 |
+| Command                         | Purpose                                                         | Logs in to the router                        | Writes                                   |
+| ------------------------------- | --------------------------------------------------------------- | -------------------------------------------- | ---------------------------------------- |
+| [`init`](#init)                 | Writes a first config file and its secret files                 | only with `--detect`                         | The config folder                        |
+| [`discover`](#discover)         | Lists the nodes, pins certificates, captures fixtures           | for the list, `--fixtures`, and `--node MAC` | A pin file, a fixture, or `lockout.json` |
+| [`check-config`](#check-config) | Checks the config, the secret files, the pins, and `ports.json` | no                                           | nothing                                  |
+| [`selftest`](#selftest)         | Polls the router once, then asks each node over SNMP            | yes, read-only                               | nothing                                  |
+| [`run`](#run)                   | The service: polls the router and serves SNMP                   | yes                                          | The state files                          |
+| [`onboard`](#onboard)           | Adds the devices to LibreNMS, or removes them                   | no                                           | `onboarded.json`                         |
+| [`dump-snmprec`](#dump-snmprec) | Prints the OIDs that a snapshot file renders                    | no                                           | nothing                                  |
 
 A normal setup runs them in this order: `init`, `discover --pin-cert`, `check-config`, `selftest`,
 `run` (through systemd), and `onboard`.
@@ -107,7 +107,10 @@ aimesh-snmp-proxy [-c FILE] discover [--fixtures DIR]
 ```
 
 With no option, `discover` logs in to the root router once and lists the nodes that it reports.
-It only reads. Give at most one of the other actions.
+It only reads the router. It records each login in `state_dir/lockout.json`, which counts toward the
+budget of 6 logins in one hour, and it creates `state_dir` if the folder is missing. A pin action
+that makes a handshake only, and no login, leaves `lockout.json` alone. Give at most one of the
+other actions.
 
 | Option               | Meaning                                                                                                        |
 | -------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -552,8 +555,8 @@ These flag combinations are usage errors: `--yes` without `--detect`, `--detect`
   node that has no IP, with a warning. With no nodes it treats the router as a standalone device
   and writes no `[nodes]`.
 - An explicit `--mode` wins. `init` warns when the router disagrees.
-- Stop the service that polls the router first: the router takes one admin session. The proxy keeps
-  to 6 router logins in one hour, and `--detect`, `discover`, and `selftest` each spend one.
+- Stop the service that polls the router first: the router takes one admin session. `--detect` logs
+  in once, as `discover` and `selftest` do. The proxy keeps to 6 router logins in one hour.
 - It keeps the login state in a temporary folder, so the `lockout.json` of the service stays as it
   is. A refused login exits with 1 and writes no config.
 - With `--dry-run` it still logs in once, but writes nothing.
