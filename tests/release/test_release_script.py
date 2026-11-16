@@ -186,6 +186,10 @@ def sandbox(tmp_path: Path) -> Sandbox:
         "STUB_DIR": str(stub_dir),
         "GIT_CONFIG_GLOBAL": os.devnull,
         "GIT_CONFIG_NOSYSTEM": "1",
+        # Never guess an identity from the machine: a runner cannot, a laptop can.
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": "user.useConfigOnly",
+        "GIT_CONFIG_VALUE_0": "true",
         "GH_REPO": SLUG,
         "RELEASE_DATE": "2026-11-20",
         "LC_ALL": "C",
@@ -678,6 +682,9 @@ def tagged(sandbox: Sandbox, tmp_path: Path) -> Path:
     clone = tmp_path / "ci"
     sandbox.git("clone", "-q", str(sandbox.origin), str(clone), cwd=tmp_path)
     sandbox.git("checkout", "-q", "v0.3.0", cwd=clone)
+    # A runner has no identity to guess from, so the tests that tag or commit need one.
+    sandbox.git("config", "user.email", EMAIL, cwd=clone)
+    sandbox.git("config", "user.name", "Jerry Yang", cwd=clone)
     return clone
 
 
@@ -707,8 +714,6 @@ def test_verify_rejects_a_commit_that_is_not_on_main(
     sandbox: Sandbox, tagged: Path
 ) -> None:
     sandbox.git("checkout", "-q", "-b", "side", cwd=tagged)
-    sandbox.git("config", "user.email", EMAIL, cwd=tagged)
-    sandbox.git("config", "user.name", "Jerry Yang", cwd=tagged)
     (tagged / "side.txt").write_text("x")
     sandbox.git("add", "-A", cwd=tagged)
     sandbox.git("commit", "--no-gpg-sign", "-q", "-m", "chore: side", cwd=tagged)
@@ -722,8 +727,6 @@ def test_verify_rejects_a_commit_that_is_not_on_main(
 def test_verify_rejects_a_missing_changelog_section(
     sandbox: Sandbox, tagged: Path
 ) -> None:
-    sandbox.git("config", "user.email", EMAIL, cwd=tagged)
-    sandbox.git("config", "user.name", "Jerry Yang", cwd=tagged)
     text = (tagged / "CHANGELOG.md").read_text().replace("[0.3.0] - ", "[0.3.1] - ")
     (tagged / "CHANGELOG.md").write_text(text)
     sandbox.git("add", "-A", cwd=tagged)
