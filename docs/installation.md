@@ -44,7 +44,7 @@ A release holds five files. You need the bundle and `SHA256SUMS`.
 
 | File                                       | Use                                                    |
 | ------------------------------------------ | ------------------------------------------------------ |
-| `aimesh-snmp-proxy-X.Y.Z.tar.gz`           | The offline bundle that `deploy/install.sh` installs   |
+| `aimesh-snmp-proxy-X.Y.Z.tar.gz`           | The bundle that `deploy/install.sh` installs           |
 | `aimesh-snmp-proxy-X.Y.Z.tar.gz.sha256`    | The checksum of the bundle                             |
 | `aimesh_snmp_proxy-X.Y.Z-py3-none-any.whl` | The Python wheel                                       |
 | `aimesh_snmp_proxy-X.Y.Z.tar.gz`           | The source distribution                                |
@@ -120,11 +120,15 @@ After it finishes, the layout is:
 /etc/aimesh-snmp-proxy/snmp_community         SNMP community (you fill it in)
 /etc/aimesh-snmp-proxy/asus_router.pem        pinned router certificate (you create it)
 /etc/systemd/system/aimesh-snmp-proxy.service the unit
-/var/lib/aimesh-snmp-proxy/                   state, created at the first run of the service
+/var/lib/aimesh-snmp-proxy/                   state, created by the first `discover` or by the service
 ```
 
-Next, write the config. Follow the guide for your router type: [Choose your path](onboarding/index.md).
-Its first step runs `init`, which asks a few questions and writes the config and the secrets.
+Next, write the config. Follow the guide for your router type:
+[Choose your path](onboarding/index.md). Its config step runs `init`, which asks a few questions and
+writes the config and the secrets.
+
+The installer prints its own list of next steps for a setup by hand. You can ignore it: `init` does
+that work. If you already edited the files by hand, `init` needs `--force`.
 
 ## Check the sandbox
 

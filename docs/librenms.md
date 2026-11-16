@@ -57,6 +57,10 @@ and `onboard` reads that file. A standalone device has only the root port, `snmp
 never creates `ports.json`. `onboard` then prints a `no ports.json` warning that you can ignore.
 `onboard` needs no router login.
 
+The commands below use the folder `/etc/aimesh-snmp-proxy/` of the single service. For an instance,
+use its folder, `/etc/aimesh-snmp-proxy/NAME/`, and add `-c /etc/aimesh-snmp-proxy/NAME/config.toml`
+after `$APP`. See [Multiple routers](instances.md).
+
 ### 1. Make an API token
 
 Create a dedicated LibreNMS user for the token. Grant only what `onboard` needs: list devices, add
@@ -122,9 +126,9 @@ The dry run prints the planned API calls and sends nothing. Read it before you a
 
 `onboard --apply` follows these rules:
 
-- It adds a device only when no device holds its hostname or its SNMP endpoint
-  (`127.0.0.1` and the node port). A device you renamed is not added twice. A device that already
-  exists is left unchanged. The token's user must be able to see it.
+- It adds a device only when no device holds its hostname or its SNMP endpoint (`127.0.0.1` and the
+  node port). A device you renamed is not added twice. A device that already exists is left
+  unchanged. The token's user must be able to see it.
 - It adds each device as SNMP v2c with the OS `asuswrt-merlin`, in port order. It writes the SNMP
   community from `community_file` into the request and never prints it.
 - It records every device it creates in `onboarded.json` in the state folder.

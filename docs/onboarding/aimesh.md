@@ -26,12 +26,15 @@ sudo $APP init --detect
 `init` asks a few questions. Each shows its default in brackets, and Enter takes it. First it asks
 for the instance name (leave it empty), the router address, the HTTPS port, and the admin user. Then
 it asks for the router type (`auto` is right), the name that LibreNMS shows, the SNMP port base, and
-the LibreNMS address (optional). It asks for the admin password last, and the prompt does not echo.
-See [`init`](../reference/cli.md#init) for every flag.
+the LibreNMS address (optional). If you give the address, `init` also asks which LibreNMS
+certificate to pin (empty uses the system trust store) and writes the `[onboard]` table. It asks for
+the admin password last, and the prompt does not echo. See [`init`](../reference/cli.md#init) for
+every flag.
 
 With `--detect`, `init` then fetches the root certificate and prints its SHA-256 fingerprint.
 Compare it with the one your browser shows for `https://192.168.50.1:8443`. Type `yes` only if they
-match. `init` logs in once, reads the AiMesh list, and puts the node addresses into `nodes.expected`:
+match. `init` logs in once, reads the AiMesh list, and puts the node addresses into
+`nodes.expected`:
 
 ```text
 detected: an AiMesh root with 2 nodes
@@ -50,8 +53,8 @@ To answer with flags instead, pass `--host`. To write the files yourself, see
 
 ## 4. Run the installer again
 
-The unit reads `asus.host`. Run the installer again from the bundle folder, so the unit can reach the
-address you gave. Stop every service first.
+The unit reads `asus.host`. Run the installer again from the bundle folder, so the unit can reach
+the address you gave. Stop every service first.
 
 ```sh
 cd /usr/local/src/aimesh-snmp-proxy-VERSION
@@ -82,9 +85,9 @@ sudo $APP selftest
 ```
 
 `discover` prints one row for each device. The first columns are the served name, the SNMP port, the
-model, the firmware, and the LAN address. The last columns are the end of the MAC address, the online
-state, the AiMesh level, and the backhaul to the parent. The port is a preview. The service pins the
-real port in `ports.json` at its first start.
+model, the firmware, and the LAN address. The last columns are the end of the MAC address, the
+online state, the AiMesh level, and the backhaul to the parent. The port is a preview. The service
+pins the real port in `ports.json` at its first start.
 
 ```text
 role    sys_name       port   model       firmware  ip             mac_tail  online  level  backhaul
@@ -131,13 +134,18 @@ sudo $APP onboard --apply
 sudo -u librenms /opt/librenms/lnms config:set icmp_check true
 ```
 
-You need an API token and an `[onboard]` table first. Run `init` with `--librenms-url`, or add the
-table yourself.
+You need an API token and an `[onboard]` table first. You get the table when you give `init` the
+LibreNMS address in step 3. Otherwise add it by hand. You create the token file yourself. See
+[LibreNMS](../librenms.md).
 
 ## What you will see
 
-LibreNMS shows the root and each node as a wireless device. Each one has ports for the wired side,
-the backhaul, and every radio, and rows for the WAN and LAN ports. See
+LibreNMS shows the root and each node as a device with wireless sensors. Each one has ports for the
+wired side and every radio, and rows for the WAN and LAN ports. A node also has a backhaul port. To
+list the devices as wireless, see
+[Show the devices as wireless](../librenms.md#show-the-devices-as-wireless).
+
+For the data of each device, see
 [Differences by router type](../reference/metrics.md#differences-by-router-type) and
 [What LibreNMS shows](../librenms.md#what-librenms-shows). Ports that share a traffic total show
 their link state but no traffic. See the

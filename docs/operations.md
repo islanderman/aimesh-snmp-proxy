@@ -17,16 +17,16 @@ sudo systemctl restart aimesh-snmp-proxy
 sudo systemctl stop aimesh-snmp-proxy
 ```
 
-Each start logs in once to every device the proxy logs in to, and a stop logs out. The router
-limits logins, so the proxy keeps a budget of 6 logins per hour for each of those devices. Avoid a
-loop of restarts. The unit stops after 5 failed starts in 15 minutes to protect the router.
+Each start logs in once to every device the proxy logs in to, and a stop logs out. The router limits
+logins, so the proxy keeps a budget of 6 logins per hour for each of those devices. Avoid a loop of
+restarts. The unit stops after 5 failed starts in 15 minutes to protect the router.
 
 After a start or restart, wait 6 minutes before you run a LibreNMS discovery. Wait 11 minutes in
 `per_node` mode. See [Wait before you run discovery](librenms.md#wait-before-you-run-discovery).
 
-Use the router web UI as little as you can while the service runs. A login from your browser
-clashes with the proxy session. The router can then refuse the proxy login. The proxy waits 2 to 5
-minutes and tries again.
+Use the router web UI as little as you can while the service runs. A login from your browser clashes
+with the proxy session. The router can then refuse the proxy login. The proxy waits 2 to 5 minutes
+and tries again.
 
 ## Read the logs
 
@@ -35,8 +35,8 @@ sudo journalctl -u aimesh-snmp-proxy -e
 sudo journalctl -u aimesh-snmp-proxy -f
 ```
 
-The service writes one JSON object per line. The `msg` field says what happened. The log shows
-each device once when it starts or stops answering:
+The service writes one JSON object per line. The `msg` field says what happened. The log shows each
+device once when it starts or stops answering:
 
 ```json
 {"ts": "2026-11-15T18:30:12.411Z", "level": "INFO", "logger": "aimesh_snmp_proxy.ops.run", "msg": "node aimesh-root (00:00:5e:**:**:**): engine on 127.0.0.1:16101"}
@@ -44,9 +44,9 @@ each device once when it starts or stops answering:
 {"ts": "2026-11-15T19:02:45.870Z", "level": "INFO", "logger": "aimesh_snmp_proxy.collector.store", "msg": "node aimesh-005311 (00:00:5e:**:**:**): SILENT, stale (older than 180 s)"}
 ```
 
-A filter masks secrets in every record, and it masks the device half of each MAC address. IP addresses
-stay. Remove them before you post a log in a public issue. Set `[logging] level = "DEBUG"` for more
-detail.
+A filter masks secrets in every record, and it masks the device half of each MAC address. IP
+addresses stay. Remove them before you post a log in a public issue. Set `[logging] level = "DEBUG"`
+for more detail.
 
 ## Change the configuration
 
@@ -89,8 +89,8 @@ sudo ./deploy/install.sh
 ```
 
 **4. Compare your config with the new example.** The installer prints the path:
-`diff /etc/aimesh-snmp-proxy/config.toml config.example.toml`. Read the [changelog](changelog.md) for
-new keys.
+`diff /etc/aimesh-snmp-proxy/config.toml config.example.toml`. Read the [changelog](changelog.md)
+for new keys.
 
 **5. Check and start.** Start each instance too.
 
@@ -120,8 +120,8 @@ unknown. Read the changelog before you roll back across a release that changes a
 Rotate every secret once a year and after any exposure. Write each new value with a command that
 does not echo it and leaves it out of your shell history.
 
-**Router password.** Stop the service first. A running service would try the old password
-against the router and latch. Change the password on the router. Then write the file and start:
+**Router password.** Stop the service first. A running service would try the old password against
+the router and latch. Change the password on the router. Then write the file and start:
 
 ```sh
 sudo systemctl stop aimesh-snmp-proxy
@@ -180,7 +180,8 @@ sudo $APP onboard --remove --apply
 ```
 
 **2. Remove each instance first.** The single service owns the shared environment, so the installer
-refuses to remove it while instances remain.
+refuses to remove it while instances remain. If you plan to purge in step 4, add `--purge` to each
+instance command too: the installer refuses to purge while an instance config remains.
 
 ```sh
 sudo ./deploy/install.sh --instance NAME --uninstall
@@ -193,9 +194,9 @@ environment. It keeps `/etc/aimesh-snmp-proxy` and the state.
 sudo ./deploy/install.sh --uninstall
 ```
 
-**4. Optional: delete the config and the state too.** Add `--purge`. The command asks you to type
-`purge`. Pass `--yes` to skip that. The state holds the port pins, so a later install may give your
-devices other ports.
+**4. Optional: delete the config and the state too.** Add `--purge`, after you purged each instance.
+The command asks you to type `purge`. Pass `--yes` to skip that. The state holds the port pins, so a
+later install may give your devices other ports.
 
 ```sh
 sudo ./deploy/install.sh --uninstall --purge

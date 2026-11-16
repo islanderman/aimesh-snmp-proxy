@@ -48,20 +48,21 @@ It listens on `127.0.0.1` only. LibreNMS adds each device with the address `127.
 so the poller must run on the same host. With distributed pollers, run the proxy on the poller that
 polls those devices.
 
-A LibreNMS container sees its own loopback address, not the address of the host, unless it shares the
-host network. A container setup is untested.
+A LibreNMS container sees its own loopback address, not the address of the host, unless it shares
+the host network. A container setup is untested.
 
 ## Why do some Ethernet ports show no traffic?
 
 Stock firmware reports no traffic per port. It reports totals: one for the wired side of a device,
-and one for each radio. The proxy puts a total on a port only when that total covers that port alone.
-Ports that share a total show their link state and speed, and no traffic.
+and one for each radio. The proxy puts a total on a port only when that total covers that port
+alone. Ports that share a total show their link state and speed, and no traffic.
 
 The rules are:
 
-- A device's own wired total covers every wired port. When exactly one port is up, that port gets it.
-- The AiMesh total of a node covers its LAN ports. When exactly one LAN port is up, and it is not the
-  uplink, that port gets it. The data does not say which LAN port carries the uplink.
+- A device's own wired total covers every wired port. When exactly one port is up, that port gets
+  it.
+- The AiMesh total of a node covers its LAN ports. When exactly one LAN port is up, and it is not
+  the uplink, that port gets it. The data does not say which LAN port carries the uplink.
 - A WAN row gets counters only from a source that measures the WAN port alone: the device's own WAN
   counter, or a wired uplink on the WAN port.
 
@@ -74,8 +75,9 @@ correct.
 
 ## Why did LibreNMS remove CPU cores or sensors?
 
-A discovery ran while the service had no detail. Detail needs up to 5 minutes to return after a
-restart. Wait 6 minutes after a restart, or 11 in `per_node` mode, before you run discovery. See
+A discovery ran while the service had no detail. Detail needs a few minutes to return after a
+restart, and up to 10 in `per_node` mode. Wait 6 minutes after a restart, or 11 in `per_node` mode,
+before you run discovery. See
 [Wait before you run discovery](librenms.md#wait-before-you-run-discovery).
 
 ## When do I need `per_node` mode?
@@ -106,8 +108,8 @@ counters never go backwards across a restart.
 ## Does it support SNMPv3?
 
 Yes. Add an `[snmp.v3]` table with an authPriv user, and add `LoadCredential=` lines for its key
-files. See the [configuration keys](reference/configuration.md#snmpv3). `onboard` adds v2c
-devices only, so keep `community_file` too.
+files. See the [configuration keys](reference/configuration.md#snmpv3). `onboard` adds v2c devices
+only, so keep `community_file` too.
 
 ## Does it serve STP or wired LLDP links?
 

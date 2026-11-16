@@ -76,9 +76,9 @@ node    aimesh-005312  16103  RT-EXAMPLE  3.0.0.x   192.168.50.12  00:53:12  yes
 ```
 
 The first columns are the served name, the SNMP port, the model, the firmware, and the LAN address.
-The last columns are the end of the MAC address, the online state, the AiMesh level, and the backhaul
-to the parent. The port is a preview. The service pins the real port in `ports.json` at its first
-start.
+The last columns are the end of the MAC address, the online state, the AiMesh level, and the
+backhaul to the parent. The port is a preview. The service pins the real port in `ports.json` at its
+first start.
 
 A standalone router, access point, or media bridge shows one row, with the role `router`.
 
@@ -93,8 +93,8 @@ For an AiMesh root, copy the addresses of the nodes into `[nodes]`. List the rea
 expected = "192.168.50.11-12"
 ```
 
-The order sets the port index. The first address gets `port_base + 1`, the second `port_base + 2`.
-A node you do not list takes the next free index later.
+The order sets the port index. The first address gets `port_base + 1`, the second `port_base + 2`. A
+node you do not list takes the next free index later.
 
 ## 5. AiMesh only: serve per-node detail
 
@@ -162,8 +162,8 @@ sudo $APP check-config
 sudo $APP selftest
 ```
 
-`check-config` validates the files and prints a summary. It reads files only. It prints no secret and
-no MAC address.
+`check-config` validates the files and prints a summary. It reads files only. It prints no secret
+and no MAC address.
 
 ```text
 config ok: /etc/aimesh-snmp-proxy/config.toml
@@ -188,5 +188,5 @@ aimesh-005312  RT-EXAMPLE  yes     serving   391
 OK: all 3 nodes serve
 ```
 
-It exits 0 only when every device serves and every expected node is present. Then start the
-service. See the guide for your router type.
+It exits 0 only when every device serves and every expected node is present. Then start the service.
+See the guide for your router type.

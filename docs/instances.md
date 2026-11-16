@@ -30,11 +30,11 @@ nodes in `per_node` mode. When the config has node pins, the installer also writ
 ## Name each router
 
 Every root device serves the name `aimesh-root` by default. `onboard` adds a device only when no
-LibreNMS device has its hostname. It finds `aimesh-root` from your first router and skips the root of
-the second one with `exists (device N); left unchanged`.
+LibreNMS device has its hostname. It finds `aimesh-root` from your first router and skips the root
+of the second one with `exists (device N); left unchanged`.
 
-`init --instance NAME` names the root `aimesh-NAME`, so each instance differs from the others. If you
-write the config by hand, give each root its own name in one of two ways.
+`init --instance NAME` names the root `aimesh-NAME`, so each instance differs from the others. If
+you write the config by hand, give each root its own name in one of two ways.
 
 **Add an override.** Its `match` is the router address, and its `sys_name` is unique:
 
@@ -113,9 +113,12 @@ sudo systemctl start aimesh-snmp-proxy
 systemd-analyze security aimesh-snmp-proxy@ap1
 ```
 
-**6. Add its devices to LibreNMS with `onboard`.** Put an `[onboard]` table in the instance config.
-The instance keeps its own `onboarded.json`, so `onboard --remove` deletes only that instance's
-devices. Turn ICMP off before `--apply` and on after. See [LibreNMS](librenms.md).
+**6. Add its devices to LibreNMS with `onboard`.** Follow [LibreNMS](librenms.md) with two changes.
+Keep the API token, the certificate pin, and the `[onboard]` table in the instance folder,
+`/etc/aimesh-snmp-proxy/ap1/`: a relative file name resolves against the folder of the config. Add
+`-c $CONF` to every `$APP` command. Wait 6 minutes after the start (11 in `per_node` mode), and turn
+ICMP off before `--apply` and on after. The instance keeps its own `onboarded.json`, so
+`onboard --remove` deletes only that instance's devices.
 
 ```sh
 sudo $APP -c $CONF onboard

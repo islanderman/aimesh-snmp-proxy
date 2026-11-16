@@ -73,8 +73,8 @@ place: stage the fixes and commit again. Fix any other failure and run the comma
 - **Commits.** Use [Conventional Commits](https://www.conventionalcommits.org/). The format is
   `type(scope): subject`. Keep the message to one or two lines. Name the specific change in the
   subject. Examples: `fix(mapping): keep a wired row on its total` and
-  `docs(install): add the dry-run step`. Types in use are `feat`, `fix`, `docs`, `test`,
-  `refactor`, `perf`, `build`, `ci`, and `chore`.
+  `docs(install): add the dry-run step`. Types in use are `feat`, `fix`, `docs`, `test`, `refactor`,
+  `perf`, `build`, `ci`, and `chore`.
 - **Small commits.** Commit after each logical change.
 - **Comments.** A code comment explains why, not what. Keep each comment to three lines or fewer.
 - **Changelog.** Add one bullet under `## [Unreleased]` in `CHANGELOG.md` for a change that a user
@@ -82,13 +82,14 @@ place: stage the fixes and commit again. Fix any other failure and run the comma
 - **Placeholders.** In code, tests, fixtures, and docs, use the router `192.168.50.1`, the
   monitoring host `192.168.50.10`, the MAC addresses `00:00:5e:00:53:xx` (RFC 7042), and names under
   `example.com`. Never commit a real address, MAC, serial number, certificate, or token.
-- **Style.** `ruff` formats and lints the Python code. `prettier` formats the Markdown. `markdownlint`
-  checks it.
+- **Style.** `ruff` formats and lints the Python code. `prettier` formats the Markdown.
+  `markdownlint` checks it.
 
 ## Work on the docs
 
-The docs use [MkDocs Material](https://squidfunk.github.io/mkdocs-material/). The `docs/requirements.txt`
-file pins every package by version and hash. Build the site in a private environment:
+The docs use [MkDocs Material](https://squidfunk.github.io/mkdocs-material/). The
+`docs/requirements.txt` file pins every package by version and hash. Build the site in a private
+environment:
 
 ```sh
 uv venv .venv-docs
@@ -105,8 +106,8 @@ until then. The build prints a notice about it. Set `NO_MKDOCS_2_WARNING=1` to h
 a move to a maintained theme before that date.
 
 The pages `docs/contributing.md` and `docs/changelog.md` include the files `CONTRIBUTING.md` and
-`CHANGELOG.md`. Edit the root files. Use full `https://` links in them, so they work on GitHub and on
-the site.
+`CHANGELOG.md`. Edit the root files. Use full `https://` links in them, so they work on GitHub and
+on the site.
 
 A test checks the shell blocks in `README.md` and `docs/`: each parses with `bash -n`, each
 `aimesh-snmp-proxy` command and each `install.sh` option exists, and each configuration key is
@@ -114,8 +115,8 @@ documented. Keep examples in step with the code.
 
 ## Submit a change
 
-1. Fork the repository, or create a branch if you have write access. Name the branch
-   `type/topic`, for example `fix/ports-json-read`. Branch from `main`.
+1. Fork the repository, or create a branch if you have write access. Name the branch `type/topic`,
+   for example `fix/ports-json-read`. Branch from `main`.
 2. Make small commits. Run the checks before each one.
 3. Open a pull request against `main`. Say what changed and why. Link the issue.
 4. Wait for CI to pass. A maintainer reviews the change.
@@ -129,8 +130,8 @@ Only a maintainer releases. `scripts/release.sh` needs the GitHub CLI (`gh`), a 
 and a repository-local `git config user.email`. The release commit and the tag use that address as
 author and committer. The script refuses a global or environment identity. It reads the changelog
 and the version, so keep `## [Unreleased]` in `CHANGELOG.md` current as changes merge. The release
-form and the `--tag` form accept `--dry-run`. The workflow also calls `--verify` and `--notes`, which
-only read.
+form and the `--tag` form accept `--dry-run`. The workflow also calls `--verify` and `--notes`,
+which only read.
 
 **1. Rehearse.** This prints the plan and the release notes. It changes nothing.
 
@@ -156,10 +157,10 @@ scripts/release.sh --tag X.Y.Z
 ```
 
 **5. Let the workflow publish.** The tag push runs the release workflow. It builds the wheel, the
-sdist, and the offline bundle, writes `SHA256SUMS`, attests every file, and publishes the GitHub
+sdist, and the install bundle, writes `SHA256SUMS`, attests every file, and publishes the GitHub
 release with the notes from `CHANGELOG.md`. No workflow commits or pushes.
 
-Run `scripts/smoke-test.sh` before you tag. It builds the sdist, the wheel, and the offline bundle,
+Run `scripts/smoke-test.sh` before you tag. It builds the sdist, the wheel, and the install bundle,
 and checks the bundle checksums. It installs the bundle into a fresh environment and runs
 `--version`, `--help`, and `check-config` on the bundled example config with throwaway secrets. CI
 runs it as the `smoke` job. It needs `uv`, `git`, `tar`, and network access.
@@ -176,6 +177,7 @@ runs it as the `smoke` job. It needs `uv`, `git`, `tar`, and network access.
 
 ## License
 
-The project uses the [Apache License 2.0](https://github.com/islanderman/aimesh-snmp-proxy/blob/main/LICENSE).
-Section 5 of the license applies to your contribution: unless you state otherwise, you submit it
-under the same license.
+The project uses the
+[Apache License 2.0](https://github.com/islanderman/aimesh-snmp-proxy/blob/main/LICENSE). Section 5
+of the license applies to your contribution: unless you state otherwise, you submit it under the
+same license.

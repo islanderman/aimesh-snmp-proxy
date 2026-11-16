@@ -24,8 +24,8 @@ First public release. It continues the private 0.2.x line.
   standalone device with one login.
 - `onboard` adds the devices to LibreNMS through its API. It runs as a dry run by default and
   deletes only the devices it created.
-- `deploy/install.sh` for systemd hosts. It installs hash-pinned binary wheels, runs the service as a
-  `DynamicUser`, adds service instances for more routers, upgrades in place, and uninstalls.
+- `deploy/install.sh` for systemd hosts. It installs hash-pinned binary wheels, runs the service as
+  a `DynamicUser`, adds service instances for more routers, upgrades in place, and uninstalls.
 - Documentation site with an onboarding guide for each router type, a configuration reference,
   operations, troubleshooting, and a security model.
 
@@ -35,5 +35,5 @@ First public release. It continues the private 0.2.x line.
   login budget of 6 logins per hour for each device.
 - Secrets live in root-only files and reach the service as systemd credentials. A log filter masks
   secrets and the device half of MAC addresses.
-- Each release ships the offline bundle, a wheel, an sdist, and `SHA256SUMS`. Every file carries a
+- Each release ships the install bundle, a wheel, an sdist, and `SHA256SUMS`. Every file carries a
   build attestation that `gh attestation verify` checks.

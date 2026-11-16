@@ -10,9 +10,9 @@ Monitor ASUS routers in LibreNMS over SNMP. It works with AiMesh roots and nodes
 routers, access points, and media bridges that run stock ASUS firmware.
 
 aimesh-snmp-proxy is a systemd service for the host that runs LibreNMS. It logs in to the router
-over HTTPS, reads its status, and answers SNMP on `127.0.0.1`. LibreNMS polls it like any other
-SNMP device. Each router, AiMesh node, access point, or media bridge shows up as its own wireless
-device. The proxy only reads: it never changes a router setting.
+over HTTPS, reads its status, and answers SNMP on `127.0.0.1`. LibreNMS polls it like any other SNMP
+device. Each router, AiMesh node, access point, or media bridge shows up as its own device with
+wireless sensors. The proxy only reads: it never changes a router setting.
 
 ## Supported devices
 
@@ -41,8 +41,8 @@ covers that port alone. Ports that share a total show their link state and no tr
 ## Quick start
 
 You need a Linux host with systemd and Python 3.11 or newer, LibreNMS 26.x on the same host, and a
-router with stock ASUS firmware. In the router web UI, set _Administration_,
-_System_, _Authentication Method_ to `HTTPS` or `Both`.
+router with stock ASUS firmware. In the router web UI, set _Administration_, _System_,
+_Authentication Method_ to `HTTPS` or `Both`.
 
 **1. Download and verify the release.**
 
@@ -65,8 +65,9 @@ sudo ./deploy/install.sh
 
 **3. Generate the config.** `init` asks for the router address and the admin password. It pins the
 router certificate after you compare the fingerprint, detects AiMesh nodes, and writes the config
-and the secrets. It replaces the files that the installer seeded, and your own edits only with
-`--force`. Run the installer again so the unit can reach the router.
+and the secrets. It writes the `[onboard]` table when you give the LibreNMS address. It replaces the
+files that the installer seeded, and your own edits only with `--force`. Run the installer again so
+the unit can reach the router.
 
 ```sh
 APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
@@ -83,8 +84,8 @@ sudo $APP selftest
 sudo systemctl enable --now aimesh-snmp-proxy
 ```
 
-**5. Add the devices to LibreNMS.** Create an API token, add an `[onboard]` table to the config, and
-wait 6 minutes after the start. Then:
+**5. Add the devices to LibreNMS.** Create an API token. Add an `[onboard]` table to the config, or
+give `init` the LibreNMS address in step 3. Wait 6 minutes after the start. Then:
 
 ```sh
 sudo -u librenms /opt/librenms/lnms config:set icmp_check false

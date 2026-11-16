@@ -16,12 +16,12 @@ proxy can and cannot do, and where the limits are.
 
 ## Process isolation
 
-The unit runs the service under `DynamicUser=yes`. systemd creates a user for each start and
-removes it at stop. The service never runs as root. It refuses to start as root or as `librenms`: a
+The unit runs the service under `DynamicUser=yes`. systemd creates a user for each start and removes
+it at stop. The service never runs as root. It refuses to start as root or as `librenms`: a
 compromise of those accounts would expose the router login.
 
-The unit applies this sandbox. Run `systemd-analyze security aimesh-snmp-proxy` for the score on your
-host.
+The unit applies this sandbox. Run `systemd-analyze security aimesh-snmp-proxy` for the score on
+your host.
 
 | Setting                                                                                                                                                 | Effect                                                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -52,10 +52,11 @@ host.
   you to use `password_file`.
 - Error messages name a key and a folder, never a value. If you type a secret where a file name
   belongs, the message shows only the folder.
-- A log filter masks every registered secret and common secret patterns in every log record. It masks
-  the device half of MAC addresses too. Debug output of the SNMP library, which would hexdump
+- A log filter masks every registered secret and common secret patterns in every log record. It
+  masks the device half of MAC addresses too. Debug output of the SNMP library, which would hexdump
   decrypted packets, stays off at every log level.
-- Rotate every secret once a year and after any exposure. See [Operations](operations.md#rotate-secrets).
+- Rotate every secret once a year and after any exposure. See
+  [Operations](operations.md#rotate-secrets).
 
 ## Router link
 
@@ -63,8 +64,8 @@ host.
   problem and never falls back to HTTP.
 - **Pinned certificate.** The proxy trusts only the router certificate in `asus.ca_file`. The system
   trust store plays no part. You create the pin with `discover --pin-cert`, which shows the
-  fingerprint and writes the file only after you type `yes`. Compare the fingerprint with the one the
-  router shows. A mismatch stops the connection before the proxy sends a login.
+  fingerprint and writes the file only after you type `yes`. Compare the fingerprint with the one
+  the router shows. A mismatch stops the connection before the proxy sends a login.
 - **Node certificates.** In `per_node` mode, each node session trusts the CA in `asus.node_ca_file`
   and checks that the node certificate names the node IP. An `[[override]] ca_file` pins one node
   certificate exactly. The proxy accepts only that certificate, even if it is marked as a CA.
@@ -85,7 +86,8 @@ host.
 - The proxy listens on `127.0.0.1` only. The config refuses any other `snmp.bind`, and the unit
   allows only loopback and the router.
 - SNMP v2c uses a community that you keep in a root-only file. SNMPv3 offers authPriv with SHA
-  authentication (SHA-256 by default) and AES-128 privacy. v2c is clear text, which is acceptable on loopback.
+  authentication (SHA-256 by default) and AES-128 privacy. v2c is clear text, which is acceptable on
+  loopback.
 - The engines answer GET, GETNEXT, and GETBULK. They cannot SET. Each engine answers only from the
   table the proxy renders for its device.
 - A node that has no fresh data does not answer at all, not even with an SNMPv3 report.
@@ -108,9 +110,9 @@ host.
 - `uv.lock` pins every dependency by version and hash.
 - The release bundle holds the project wheel, the pinned `asusrouter` wheel, and a
   `requirements.txt` that pins every other package by version and hash. The installer downloads
-  those packages from PyPI. It runs `pip install --require-hashes --only-binary=:all: --no-deps`
-  (or the `uv` equivalent), so it builds nothing, runs no setup script, and rejects a file whose
-  hash differs.
+  those packages from PyPI. It runs `pip install --require-hashes --only-binary=:all: --no-deps` (or
+  the `uv` equivalent), so it builds nothing, runs no setup script, and rejects a file whose hash
+  differs.
 - The router library `asusrouter` comes from a pinned git commit. The bundle builder compiles that
   commit into a wheel and records the wheel hash.
 - The bundle carries `SHA256SUMS`, and the installer checks it before it changes anything.
