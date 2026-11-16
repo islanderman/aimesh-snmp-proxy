@@ -192,6 +192,24 @@ def test_install_renders_the_unit_for_this_host(host, unit_parser):
     assert "User" not in service
 
 
+def next_steps(stdout: str) -> list[str]:
+    """The closing "Next:" list, one stripped line each."""
+    return [line.strip() for line in stdout.split("Next:", 1)[1].strip().splitlines()]
+
+
+def test_the_next_steps_start_with_init_and_leave_no_hand_edits(host):
+    result = host.run()
+    assert result.returncode == 0, result.stderr
+    steps = next_steps(result.stdout)
+    app = "/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy"
+    assert steps[0] == f"1. sudo {app} init --detect"
+    assert steps[2].startswith("2. run this script again (the unit allows only")
+    assert steps[3].startswith("3. run check-config and selftest, then systemctl")
+    # init replaces only untouched placeholders: a hand edit first would need --force.
+    edits = [s for s in steps if "fill " in s or "edit " in s or "asus_password" in s]
+    assert edits == []
+
+
 def test_install_only_reloads_systemd(host):
     assert host.run().returncode == 0
     verbs = [c.split()[1] for c in host.calls("systemctl")]
