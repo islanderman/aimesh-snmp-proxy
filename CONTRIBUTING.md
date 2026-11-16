@@ -128,8 +128,9 @@ Never commit to `main`.
 Only a maintainer releases. `scripts/release.sh` needs the GitHub CLI (`gh`), a clean working tree,
 and a repository-local `git config user.email`. The release commit and the tag use that address as
 author and committer. The script refuses a global or environment identity. It reads the changelog
-and the version, so keep `## [Unreleased]` in `CHANGELOG.md` current as changes merge. Each form
-below also accepts `--dry-run`.
+and the version, so keep `## [Unreleased]` in `CHANGELOG.md` current as changes merge. The release
+form and the `--tag` form accept `--dry-run`. The workflow also calls `--verify` and `--notes`, which
+only read.
 
 **1. Rehearse.** This prints the plan and the release notes. It changes nothing.
 
