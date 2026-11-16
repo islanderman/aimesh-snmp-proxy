@@ -1,0 +1,74 @@
+name: Bug report
+description: Something does not work, or a router, AP or bridge shows wrong data.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not post passwords, SNMP communities, public IP addresses, MAC addresses, serial
+        numbers or hostnames. Replace them with placeholders such as `192.168.50.1` and
+        `00:00:5e:00:53:01`. Report security problems privately: see `SECURITY.md`.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `aimesh-snmp-proxy --version`.
+      placeholder: aimesh-snmp-proxy 0.3.0
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: What does the proxy poll?
+      options:
+        - Standalone router
+        - AiMesh root router with nodes
+        - AiMesh node
+        - Router in access point mode
+        - Router in media bridge mode
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Router models and firmware
+      description: Model and stock firmware version of each device, from the router web page.
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - Offline bundle with deploy/install.sh
+        - From source with uv
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Commands you ran and, if it helps, the config with secrets removed.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output and logs
+      description: >-
+        Output of `aimesh-snmp-proxy check-config` and `selftest`, or the service log from
+        `journalctl -u aimesh-snmp-proxy`.
+      render: shell
+  - type: checkboxes
+    id: redacted
+    attributes:
+      label: Private data
+      options:
+        - label: I removed passwords, SNMP communities, public IPs, MAC addresses and serial numbers.
+          required: true

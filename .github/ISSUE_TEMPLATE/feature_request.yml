@@ -1,0 +1,32 @@
+name: Feature request
+description: Ask for a new metric, a new device type or a change in behavior.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you want to do?
+      description: Describe the goal, not only the change you have in mind.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: For a new metric, name the router page or API field and the SNMP object it should map to.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you tried
+  - type: input
+    id: model
+    attributes:
+      label: Router models and firmware
+      description: Model and stock firmware version, if the request depends on a device.
+  - type: checkboxes
+    id: redacted
+    attributes:
+      label: Private data
+      options:
+        - label: I removed passwords, SNMP communities, public IPs, MAC addresses and serial numbers.
+          required: true
