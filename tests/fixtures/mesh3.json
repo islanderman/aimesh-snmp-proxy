@@ -1,0 +1,94 @@
+{
+  "format": 1,
+  "_unverified": "UNVERIFIED ON HARDWARE: the get_port_status.cgi entry (queries) is built from the asusrouter c1e5900 parser (modules/ports/source.py, status.py: port_info, is_on, link_rate, max_rate, cap bits WAN=0 LAN=1 USB=7, ui_display), not captured from a router. Its labels and values are illustrative.",
+  "_source": "Hand-written, sanitized. Field names and value formats come from asusrouter c1e5900: tests/modules/aimesh/test_topology.py (_root_raw, _wl_raw, _wired_raw), tests/modules/clients/test_translate.py, tests/modules/traffic/aimesh/test_source.py (_RAW), tests/modules/system_status/test_source.py, tests/modules/wifi/test_source.py, tests/modules/clock/test_source.py, tests/test_data/_v1/rt_ax88u_merlin_388/{hook_001,temperature_001,onboarding_002}.content. MACs use the RFC 7042 documentation range; numbers are illustrative.",
+  "appget": {
+    "label_mac": "00:00:5E:00:53:01",
+    "lan_hwaddr": "00:00:5E:00:53:01",
+    "productid": "RT-AX88U",
+    "firmver": "3.0.0.4",
+    "buildno": "388",
+    "extendno": "10004_g0000004",
+    "wl0_nband": "2",
+    "wl1_nband": "1",
+    "wl2_nband": "4",
+    "sw_mode": "1",
+    "get_ui_support": {"amas": 1, "amasRouter": 1},
+    "uptime": "Sat, 01 Aug 2015 03:09:22 +0200(4162 secs since boot)",
+    "cpu_usage": {
+      "cpu1_total": "52557468",
+      "cpu1_usage": "4733197",
+      "cpu2_total": "52587131",
+      "cpu2_usage": "1731814",
+      "cpu3_total": "52621020",
+      "cpu3_usage": "1821047",
+      "cpu4_total": "52620879",
+      "cpu4_usage": "1720689"
+    },
+    "memory_usage": {"mem_total": "1048576", "mem_free": "235464", "mem_used": "813112"},
+    "wl_control_channel": ["6", "100", "5"],
+    "get_clientlist": {
+      "00:00:5E:00:53:A1": {"mac": "00:00:5E:00:53:A1", "isOnline": "1", "isWL": "2", "rssi": "-46", "curTx": "866", "curRx": "650", "amesh_papMac": "00:00:5E:00:53:01", "isGN": "", "sdn_type": "MAINFH", "mlo": "0"},
+      "00:00:5E:00:53:A2": {"mac": "00:00:5E:00:53:A2", "isOnline": "1", "isWL": "2", "rssi": "-60", "curTx": "433", "curRx": "390", "amesh_papMac": "00:00:5E:00:53:01", "isGN": "", "sdn_type": "MAINFH", "mlo": "0"},
+      "00:00:5E:00:53:A3": {"mac": "00:00:5E:00:53:A3", "isOnline": "1", "isWL": "1", "rssi": "-70", "curTx": "144", "curRx": "72", "amesh_papMac": "00:00:5E:00:53:01", "isGN": "", "sdn_type": "MAINFH", "mlo": "0"},
+      "00:00:5E:00:53:A4": {"mac": "00:00:5E:00:53:A4", "isOnline": "1", "isWL": "2", "rssi": "-50", "curTx": "1201", "curRx": "1081", "amesh_papMac": "00:00:5E:00:53:02", "isGN": "", "sdn_type": "MAINFH", "mlo": "0"},
+      "00:00:5E:00:53:A5": {"mac": "00:00:5E:00:53:A5", "isOnline": "1", "isWL": "0", "amesh_papMac": "00:00:5E:00:53:03"},
+      "00:00:5E:00:53:A6": {"mac": "00:00:5E:00:53:A6", "isOnline": "1", "isWL": "2", "mlo": "1", "amesh_papMac": "00:00:5E:00:53:01", "mlo_links": {"5G1": {"mac": "00:00:5E:00:53:B6", "rssi": "-63", "tx": "1", "rx": "0", "conn_time": "01:00:00"}}},
+      "00:00:5E:00:53:A7": {"mac": "00:00:5E:00:53:A7", "isOnline": "0", "isWL": "2", "rssi": "-40", "amesh_papMac": "00:00:5E:00:53:01"},
+      "00:00:5E:00:53:02": {"mac": "00:00:5E:00:53:02", "isOnline": "1", "isWL": "0", "amesh_isRe": "1"}
+    },
+    "get_clientlist_from_json_database": {}
+  },
+  "pages": {
+    "ajax_onboarding.asp": {
+      "get_onboardinglist": [{}],
+      "get_cfg_clientlist": [[
+        {"mac": "00:00:5E:00:53:01", "model_name": "RT-AX88U", "ui_model_name": "RT-AX88U", "product_id": "RT-AX88U", "fwver": "3.0.0.4.388.4_0", "ip": "192.168.50.1", "online": "1", "level": "0", "re_path": "0", "band_num": "3", "ap2g": "00:00:5E:00:53:10", "ap2g_fh": "00:00:5E:00:53:11", "ap5g": "00:00:5E:00:53:14", "ap5g_fh": "00:00:5E:00:53:15", "ap5g1": "", "ap6g": "00:00:5E:00:53:18", "band_info": {"0": {"unit": 0}, "1": {"unit": 1}, "4": {"unit": 2}}, "wired_mac": ["00:00:5E:00:53:03"], "config": {"wireless": {"wl0_radio": "1", "wl1_radio": "1", "wl2_radio": "1"}}},
+        {"mac": "00:00:5E:00:53:02", "model_name": "M2_RAW", "ui_model_name": "M2", "product_id": "P2", "fwver": "3.0.0.4.388.4_0", "ip": "192.168.50.101", "online": "1", "level": "1", "re_path": "8", "band_num": "3", "ap2g": "00:00:5E:00:53:20", "ap5g": "00:00:5E:00:53:24", "ap5g1": "00:00:5E:00:53:28", "band_info": {"0": {"unit": 0}, "2": {"unit": 1}, "3": {"unit": 2}}, "pap5g": "00:00:5E:00:53:14", "rssi5g": "-54", "sta5g": "00:00:5E:00:53:2A", "config": {"wireless": {"wl0_radio": "1", "wl1_radio": "1", "wl2_radio": "0"}}},
+        {"mac": "00:00:5E:00:53:03", "ui_model_name": "M3", "fwver": "3.0.0.4.388.4_0", "ip": "192.168.50.102", "online": "1", "level": "0", "re_path": "1", "ap2g": "", "ap5g": "", "sta2g": "00:00:5E:00:53:31", "sta5g": "00:00:5E:00:53:34", "band_info": {"0": {"unit": 0}, "1": {"unit": 1}}, "wired_port": {"wan_port": {"WAN 0": {"link_rate": "G"}}}, "config": {"wireless": {"wl0_radio": "0", "wl1_radio": "0"}}}
+      ]],
+      "get_onboardingstatus": [{"cfg_obstatus": "1", "cfg_ready": "1", "cfg_re_maxnum": "9", "cfg_recount": "2"}]
+    },
+    "ajax_coretmp.asp": {
+      "curr_coreTmp_wl0_raw": "44&deg;C",
+      "curr_coreTmp_wl1_raw": "44&deg;C",
+      "curr_coreTmp_wl2_raw": "<i>disabled</i>",
+      "curr_cpuTemp": "65.514"
+    }
+  },
+  "queries": [
+    {"endpoint": "get_diag_content_data.cgi", "query": {"filter": "node_mac>txt>00:00:5E:00:53:01>0"}, "reply": {"contents": [["4", "20"], ["5", "26"]]}},
+    {"endpoint": "get_diag_content_data.cgi", "query": {"filter": "node_mac>txt>00:00:5E:00:53:02>0"}, "reply": {"contents": [["12", "40"]]}},
+    {"endpoint": "get_diag_content_data.cgi", "query": {"filter": "node_mac>txt>00:00:5E:00:53:03>0"}, "reply": {"contents": [["3", "31"]]}},
+    {"endpoint": "get_diag_wifi_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:01", "band_mac": "00:00:5E:00:53:11"}, "reply": {"data": {"rx": 100, "tx": 200, "avg_rx": 90, "avg_tx": 180}, "phy": {"rx": 144, "tx": 144}, "error_status": 200}},
+    {"endpoint": "get_diag_wifi_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:01", "band_mac": "00:00:5E:00:53:15"}, "reply": {"data": {"rx": 2000, "tx": 8000, "avg_rx": 1500, "avg_tx": 6000}, "phy": {"rx": 866, "tx": 866}, "error_status": 200}},
+    {"endpoint": "get_diag_wifi_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:01", "band_mac": "00:00:5E:00:53:18"}, "reply": {"data": {"rx": 0, "tx": 0, "avg_rx": 0, "avg_tx": 0}, "phy": {"rx": 0, "tx": 0}, "error_status": 200}},
+    {"endpoint": "get_diag_eth_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:01", "is_bh": "0"}, "reply": {"data": {"rx": 5000, "tx": 3000, "avg_rx": 4000, "avg_tx": 2500}, "error_status": 200}},
+    {"endpoint": "get_diag_wifi_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:02", "band_mac": "00:00:5E:00:53:20"}, "reply": {"data": {"rx": 10, "tx": 20, "avg_rx": 10, "avg_tx": 20}, "phy": {"rx": 72, "tx": 72}, "error_status": 200}},
+    {"endpoint": "get_diag_wifi_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:02", "band_mac": "00:00:5E:00:53:24"}, "reply": {"data": {"rx": 300, "tx": 1200, "avg_rx": 250, "avg_tx": 1000}, "phy": {"rx": 1201, "tx": 1201}, "error_status": 200}},
+    {"endpoint": "get_diag_wifi_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:02", "band_mac": "00:00:5E:00:53:28"}, "reply": {"data": {"rx": 0, "tx": 0, "avg_rx": 0, "avg_tx": 0}, "phy": {"rx": 0, "tx": 0}, "error_status": 200}},
+    {"endpoint": "get_diag_eth_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:02", "is_bh": "0"}, "reply": {"data": {"rx": 0, "tx": 0, "avg_rx": 0, "avg_tx": 0}, "error_status": 200}},
+    {"endpoint": "get_diag_sta_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:01", "sta_mac": "00:00:5E:00:53:2A"}, "reply": {"data": {"rx": 1400, "tx": 350, "avg_rx": 1200, "avg_tx": 300}, "phy": {"rx": 1729, "tx": 1729}, "error_status": 200}},
+    {"endpoint": "get_diag_eth_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:03", "is_bh": "0"}, "reply": {"data": {"rx": 50, "tx": 60, "avg_rx": 50, "avg_tx": 60}, "error_status": 200}},
+    {"endpoint": "get_diag_eth_traffic.cgi", "query": {"node_mac": "00:00:5E:00:53:03", "is_bh": "1"}, "reply": {"data": {"rx": 700, "tx": 900, "avg_rx": 650, "avg_tx": 850}, "error_status": 200}},
+    {"endpoint": "get_port_status.cgi", "query": {"node_mac": "all"}, "reply": {
+      "node_info": {"00:00:5E:00:53:01": {"cd_good_to_go": "1"}},
+      "port_info": {
+        "00:00:5E:00:53:01": {
+          "W0": {"is_on": "1", "link_rate": "1000", "max_rate": "2500", "cap": "1", "ui_display": "2.5G WAN"},
+          "L1": {"is_on": "1", "link_rate": "1000", "max_rate": "1000", "cap": "2", "ui_display": "LAN 1"},
+          "L2": {"is_on": "0", "link_rate": "0", "max_rate": "1000", "cap": "2", "ui_display": "LAN 2"},
+          "U1": {"is_on": "0", "link_rate": "0", "max_rate": "5000", "cap": "128"}
+        },
+        "00:00:5E:00:53:02": {
+          "W0": {"is_on": "0", "link_rate": "0", "max_rate": "1000", "cap": "1"},
+          "L1": {"is_on": "1", "link_rate": "100", "max_rate": "1000", "cap": "2"}
+        },
+        "00:00:5E:00:53:03": {
+          "W0": {"is_on": "1", "link_rate": "1000", "max_rate": "1000", "cap": "1"},
+          "L1": {"is_on": "0", "link_rate": "0", "max_rate": "1000", "cap": "2"}
+        }
+      }
+    }}
+  ]
+}
