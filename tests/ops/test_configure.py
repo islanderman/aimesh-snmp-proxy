@@ -191,6 +191,19 @@ def test_dry_run_writes_nothing_and_prints_the_config(init, paths):
     assert os.listdir(paths / "tmp") == []
 
 
+def test_a_dry_run_prints_neither_the_password_nor_the_community(
+    init, paths, monkeypatch
+):
+    community = secrets.token_hex(16)  # the value init will draw, known to the test
+    monkeypatch.setattr(configure.secrets, "token_hex", lambda _nbytes: community)
+    argv = flags(paths / "etc", "--dry-run", "--librenms-url", "https://192.168.50.10")
+    result = init(argv)
+    assert result.code == 0, result.err
+    assert "snmp_community (0600): a new random SNMP community" in result.out
+    assert PASSWORD not in result.text
+    assert community not in result.text
+
+
 def test_dry_run_still_refuses_an_existing_file(init, paths):
     etc = paths / "etc"
     etc.mkdir()
