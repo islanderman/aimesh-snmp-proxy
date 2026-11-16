@@ -7,6 +7,8 @@ import datetime
 import ipaddress
 import json
 import os
+import ssl
+import types
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -201,6 +203,34 @@ def leaf_only() -> Callable[[CertPair], CertPair]:
 @pytest.fixture
 def canaries() -> dict[str, str]:
     return dict(CANARIES)
+
+
+@pytest.fixture
+def lax_tls(monkeypatch: pytest.MonkeyPatch) -> Callable[..., list[ssl.SSLContext]]:
+    """Start new TLS contexts of the given modules at MINIMUM_SUPPORTED.
+
+    Many Linux builds default to that; returns the contexts created meanwhile.
+    """
+    created: list[ssl.SSLContext] = []
+
+    def lax(make: Callable[..., ssl.SSLContext]) -> Callable[..., ssl.SSLContext]:
+        def factory(*args: object, **kwargs: object) -> ssl.SSLContext:
+            ctx = make(*args, **kwargs)
+            ctx.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
+            created.append(ctx)
+            return ctx
+
+        return factory
+
+    def patch(*modules: object) -> list[ssl.SSLContext]:
+        fake = types.SimpleNamespace(**vars(ssl))
+        fake.SSLContext = lax(ssl.SSLContext)
+        fake.create_default_context = lax(ssl.create_default_context)
+        for module in modules:
+            monkeypatch.setattr(module, "ssl", fake)
+        return created
+
+    return patch
 
 
 @pytest.fixture

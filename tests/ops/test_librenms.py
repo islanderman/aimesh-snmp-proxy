@@ -1,4 +1,6 @@
 import json
+import socket
+import ssl
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -6,7 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from aimesh_snmp_proxy.config import ConfigError
+from aimesh_snmp_proxy import config
+from aimesh_snmp_proxy.config import ConfigError, RouterPin
 from aimesh_snmp_proxy.logsafe import SecretStr
 from aimesh_snmp_proxy.ops import librenms
 from aimesh_snmp_proxy.ops.librenms import (
@@ -529,3 +532,18 @@ def test_deeply_nested_json_is_a_transport_error(fake, client):
     fake.routes["GET", f"{API}/x"] = lambda seen: (200, {}, b"[" * 200_000)
     with pytest.raises(TransportError, match="not JSON"):
         client.get_device("x")
+
+
+def closed_port() -> int:
+    with socket.socket() as probe:  # bound, never listening, then closed
+        probe.bind(("127.0.0.1", 0))
+        return probe.getsockname()[1]
+
+
+def test_every_librenms_tls_context_requires_tls_1_2(lax_tls, router_cert):
+    created = lax_tls(librenms, config)
+    pin = RouterPin(router_cert.cert_pem, (router_cert.fingerprint,))
+    librenms.tls_context(None)
+    librenms.tls_context(pin)
+    assert librenms.presented_fingerprint("127.0.0.1", closed_port(), 1.0) is None
+    assert [c.minimum_version for c in created] == [ssl.TLSVersion.TLSv1_2] * 3

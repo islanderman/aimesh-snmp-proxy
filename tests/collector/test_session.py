@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import socket
 import ssl
 from types import SimpleNamespace
 
@@ -687,3 +688,13 @@ def test_retire_gives_up_waiting_after_the_timeout(mock_router, make_session):
     router, session = run(scenario())
     assert session.closed
     assert router.paths()[-1] == "/Logout.asp"
+
+
+def test_the_unverified_chain_fetch_still_requires_tls_1_2(lax_tls):
+    created = lax_tls(session_mod)
+    with socket.socket() as probe:  # bound, never listening, then closed
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    with pytest.raises(ConnectionRefusedError):
+        asyncio.run(session_mod.fetch_chain("127.0.0.1", port, timeout_s=5))
+    assert [c.minimum_version for c in created] == [ssl.TLSVersion.TLSv1_2]

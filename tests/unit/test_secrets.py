@@ -445,6 +445,7 @@ def handshake(client_ctx, server_cert, tmp_path, hostname="192.168.50.1"):
     cert.write_text(server_cert.cert_pem)
     key.write_text(server_cert.key_pem)
     server_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    server_ctx.minimum_version = ssl.TLSVersion.TLSv1_2
     server_ctx.load_cert_chain(cert, key)
     c_in, c_out, s_in, s_out = (ssl.MemoryBIO() for _ in range(4))
     client = client_ctx.wrap_bio(c_in, c_out, server_hostname=hostname)
@@ -474,15 +475,8 @@ def test_router_pin_fingerprint_and_context(cfg, router_cert):
     assert ctx.minimum_version >= ssl.TLSVersion.TLSv1_2
 
 
-def test_router_context_sets_tls_1_2_whatever_the_platform_default(cfg, monkeypatch):
-    # Many Linux builds leave minimum_version at MINIMUM_SUPPORTED by default.
-    def lax_default(protocol):
-        ctx = ssl.SSLContext(protocol)
-        ctx.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
-        return ctx
-
-    linux_like = types.SimpleNamespace(**{**vars(ssl), "SSLContext": lax_default})
-    monkeypatch.setattr(config, "ssl", linux_like)
+def test_router_context_sets_tls_1_2_whatever_the_platform_default(cfg, lax_tls):
+    lax_tls(config)
     ctx = load_router_pin(cfg.asus.ca_file).ssl_context()
     assert ctx.minimum_version == ssl.TLSVersion.TLSv1_2
 
@@ -613,6 +607,7 @@ def test_a_node_leaf_pin_holds_on_blocking_sockets(
 ):
     pin = load_node_pin(write_file("node-104.pem", old_node_cert.cert_pem, 0o644))
     server_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    server_ctx.minimum_version = ssl.TLSVersion.TLSv1_2
     server_ctx.load_cert_chain(
         write_file("srv.pem", old_node_child.cert_pem),
         write_file("srv.key", old_node_child.key_pem),

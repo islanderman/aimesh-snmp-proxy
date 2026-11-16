@@ -158,7 +158,9 @@ def tls_context(pin: RouterPin | None) -> ssl.SSLContext:
     refuses; an exact leaf match is stricter than the name.
     """
     if pin is None:
-        return ssl.create_default_context()
+        ctx = ssl.create_default_context()
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2  # explicit on every platform
+        return ctx
     ctx = pin.ssl_context()  # the pin's certificates only, CERT_REQUIRED, no name
     ctx.sslsocket_class = _leaf_pinned_socket(pin.fingerprints)
     return ctx
@@ -171,6 +173,7 @@ def presented_fingerprint(host: str, port: int, timeout: float) -> str | None:
     who compares it with the pin out of band; it is never trusted.
     """
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ctx.minimum_version = ssl.TLSVersion.TLSv1_2
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
     try:
