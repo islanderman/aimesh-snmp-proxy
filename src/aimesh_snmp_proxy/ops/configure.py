@@ -78,7 +78,7 @@ COMMUNITY_FILE = "snmp_community"
 PIN_FILE = "asus_router.pem"
 LIBRENMS_CA_FILE = "librenms.pem"
 TOKEN_FILE = "librenms_token"  # noqa: S105 - a file name, not a secret
-SECRET_MODE = 0o600
+OWNER_ONLY_MODE = 0o600
 PUBLIC_MODE = 0o644
 QUESTION_TRIES = 3
 SEED_STATE_DIR = "/var/lib/aimesh-snmp-proxy"  # install.sh's STATE_LINE
@@ -839,8 +839,8 @@ class _Init:
         community = secrets.token_hex(16)
         SecretStr(community)  # registered for log redaction
         files = [
-            (PASSWORD_FILE, answers.password, SECRET_MODE),
-            (COMMUNITY_FILE, f"{community}\n".encode(), SECRET_MODE),
+            (PASSWORD_FILE, answers.password, OWNER_ONLY_MODE),
+            (COMMUNITY_FILE, f"{community}\n".encode(), OWNER_ONLY_MODE),
         ]
         if answers.librenms_ca is not None:
             files.append(
@@ -854,7 +854,7 @@ class _Init:
             plan = self.detect(plan, stage, answers)
             pinned = True
         text = render_config(plan)
-        _write(stage / CONFIG_FILE, text.encode(), SECRET_MODE)
+        _write(stage / CONFIG_FILE, text.encode(), OWNER_ONLY_MODE)
         self.check(stage, answers.librenms_ca)
         names = [name for name, _, _ in files] + [CONFIG_FILE]
         if self.args.dry_run:
@@ -865,7 +865,7 @@ class _Init:
         return EXIT_OK
 
     def detect(self, plan: Plan, stage: Path, answers: _Answers) -> Plan:
-        _write(stage / CONFIG_FILE, render_config(plan).encode(), SECRET_MODE)
+        _write(stage / CONFIG_FILE, render_config(plan).encode(), OWNER_ONLY_MODE)
         cfg = self.check(stage, answers.librenms_ca)
         output = answers.output
         unit = f"{SERVICE}@{answers.instance}" if answers.instance else SERVICE
@@ -978,9 +978,9 @@ class _Init:
         }
         print(f"dry run: nothing written. {answers.output} would get:", file=self.out)
         for name in names[:-1]:
-            mode = PUBLIC_MODE if name == LIBRENMS_CA_FILE else SECRET_MODE
+            mode = PUBLIC_MODE if name == LIBRENMS_CA_FILE else OWNER_ONLY_MODE
             print(f"  {name} ({mode:04o}): {what[name]}", file=self.out)
-        print(f"  {CONFIG_FILE} ({SECRET_MODE:04o}):", file=self.out)
+        print(f"  {CONFIG_FILE} ({OWNER_ONLY_MODE:04o}):", file=self.out)
         print(text, end="", file=self.out)
         print("config ok: check-config's loader accepts it", file=self.out)
 
