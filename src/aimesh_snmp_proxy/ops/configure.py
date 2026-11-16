@@ -1038,14 +1038,13 @@ class _Init:
             f"{app} selftest  (with the service stopped)",
             f"sudo systemctl enable --now {unit}",
         ]
+        token = f"put a LibreNMS API token in {_quote(output / TOKEN_FILE)} (0600)"
         if plan.librenms_url is not None:
+            steps.append(f"{token}, then {app} onboard, then onboard --apply")
+        else:  # a second init would refuse these files, or with --force redo them
             steps.append(
-                f"put a LibreNMS API token in {_quote(output / TOKEN_FILE)} (0600), "
-                f"then {app} onboard, then onboard --apply"
-            )
-        else:
-            steps.append(
-                f"add [onboard] (or re-run init with --librenms-url), then {app} "
+                f"add [onboard] to {_quote(output / CONFIG_FILE)} by hand (url, and "
+                f'token_file = "{TOKEN_FILE}"), {token}, then {app} onboard, then '
                 "onboard --apply"
             )
         if answers.output != output:
