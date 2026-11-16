@@ -15,6 +15,7 @@ LOCKFILE=uv.lock
 CHANGELOG=CHANGELOG.md
 NUM='(0|[1-9][0-9]*)'
 VERSION_RE="^$NUM\\.$NUM\\.$NUM\$"
+CURRENT_RE="^$NUM\\.$NUM\\.$NUM(\\.dev[0-9]+)?\$"
 TAG_RE="^v$NUM\\.$NUM\\.$NUM\$"
 DATE_RE='^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
 DRY_RUN=0
@@ -79,7 +80,7 @@ check_identity() {
   done
 }
 
-version_newer() { # version_newer NEW OLD: both X.Y.Z; succeed when NEW is higher
+version_newer() { # version_newer NEW OLD: NEW is X.Y.Z, OLD is X.Y.Z or X.Y.Z.devN
   awk -v new="$1" -v old="$2" 'BEGIN {
     split(new, a, ".")
     split(old, b, ".")
@@ -87,7 +88,8 @@ version_newer() { # version_newer NEW OLD: both X.Y.Z; succeed when NEW is highe
       if (a[i] + 0 > b[i] + 0) exit 0
       if (a[i] + 0 < b[i] + 0) exit 1
     }
-    exit 1
+    # The same numbers: a release is newer than its own .devN, and equal to itself.
+    exit (b[4] != "" ? 0 : 1)
   }'
 }
 
@@ -294,7 +296,8 @@ prepare_release() { # prepare_release VERSION
   done
   base=$(git rev-parse "$REMOTE/$MAIN")
   current=$(git show "$REMOTE/$MAIN:$PYPROJECT" | project_version)
-  [[ $current =~ $VERSION_RE ]] || die "the version '$current' in $PYPROJECT is not like 1.2.3"
+  [[ $current =~ $CURRENT_RE ]] ||
+    die "the version '$current' in $PYPROJECT is not like 1.2.3 or 1.2.3.dev0"
   version_newer "$ver" "$current" || die "$ver is not newer than the current version $current"
   tag_exists "v$ver" && die "tag v$ver already exists"
   branch_exists "$branch" && die "branch $branch already exists"

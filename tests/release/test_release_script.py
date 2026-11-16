@@ -222,6 +222,20 @@ def state(box: Sandbox) -> tuple[str, ...]:
     )
 
 
+def set_version(box: Sandbox, version: str) -> None:
+    """Commit this current version to pyproject.toml and uv.lock on main."""
+    box.write("pyproject.toml", PYPROJECT.replace("0.2.4", version))
+    box.write(
+        "uv.lock",
+        LOCK.replace(
+            'name = "aimesh-snmp-proxy"\nversion = "0.2.4"',
+            f'name = "aimesh-snmp-proxy"\nversion = "{version}"',
+        ),
+    )
+    box.commit_all(f"chore: set version {version}")
+    box.git("push", "-q", "origin", "main")
+
+
 # --- opening the release PR ---------------------------------------------------
 
 
@@ -314,6 +328,62 @@ def test_prepare_rejects_a_version_that_is_not_newer(
     done = sandbox.release(old)
     assert done.returncode != 0
     assert f"{old} is not newer than the current version 0.2.4" in done.stderr
+
+
+@pytest.mark.parametrize("new", ["0.3.0", "0.3.1", "0.4.0", "1.0.0"])
+def test_prepare_releases_over_a_dev_version(sandbox: Sandbox, new: str) -> None:
+    set_version(sandbox, "0.3.0.dev0")
+    prepare(sandbox, new)
+    pyproject = (sandbox.work / "pyproject.toml").read_text()
+    assert pyproject == PYPROJECT.replace('version = "0.2.4"', f'version = "{new}"')
+    lock = (sandbox.work / "uv.lock").read_text()
+    assert f'name = "aimesh-snmp-proxy"\nversion = "{new}"\n' in lock
+    assert "dev" not in lock
+
+
+@pytest.mark.parametrize("old", ["0.2.9", "0.2.4", "0.1.0"])
+def test_prepare_rejects_a_release_older_than_a_dev_version(
+    sandbox: Sandbox, old: str
+) -> None:
+    set_version(sandbox, "0.3.0.dev0")
+    done = sandbox.release(old)
+    assert done.returncode != 0
+    assert f"{old} is not newer than the current version 0.3.0.dev0" in done.stderr
+    assert sandbox.git("branch", "--list", "release/*") == ""
+
+
+def test_prepare_rejects_the_release_that_a_later_dev_version_precedes(
+    sandbox: Sandbox,
+) -> None:
+    set_version(sandbox, "0.3.1.dev2")
+    done = sandbox.release("0.3.0")
+    assert done.returncode != 0
+    assert "0.3.0 is not newer than the current version 0.3.1.dev2" in done.stderr
+
+
+@pytest.mark.parametrize("current", ["0.3.0rc1", "0.3.0.post1", "0.3.0.dev", "0.3"])
+def test_prepare_rejects_a_current_version_it_cannot_compare(
+    sandbox: Sandbox, current: str
+) -> None:
+    set_version(sandbox, current)
+    done = sandbox.release("0.4.0")
+    assert done.returncode != 0
+    assert (
+        f"the version '{current}' in pyproject.toml is not like 1.2.3 or 1.2.3.dev0"
+        in done.stderr
+    )
+
+
+def test_a_dev_version_goes_through_the_whole_release(sandbox: Sandbox) -> None:
+    set_version(sandbox, "0.3.0.dev0")
+    plan = sandbox.release("0.3.0", "--dry-run")
+    assert plan.returncode == 0, plan.stderr
+    assert "0.3.0.dev0 -> 0.3.0" in plan.stdout
+    prepare(sandbox)
+    merged = sandbox.merge_release("0.3.0")
+    done = sandbox.release("--tag", "0.3.0")
+    assert done.returncode == 0, done.stderr
+    assert sandbox.git("rev-parse", "v0.3.0^{commit}", cwd=sandbox.origin) == merged
 
 
 def test_prepare_refuses_a_dirty_tree(sandbox: Sandbox) -> None:
