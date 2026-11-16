@@ -432,4 +432,5 @@ main() {
   esac
 }
 
-main "$@"
+# A test sources this file to call single functions: only a direct run starts main.
+if [ "${BASH_SOURCE[0]:-$0}" = "$0" ]; then main "$@"; fi

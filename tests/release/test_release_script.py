@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from packaging.version import Version
 
 pytestmark = pytest.mark.skipif(
     shutil.which("jq") is None, reason="the gh stub needs jq"
@@ -372,6 +374,31 @@ def test_prepare_rejects_a_current_version_it_cannot_compare(
         f"the version '{current}' in pyproject.toml is not like 1.2.3 or 1.2.3.dev0"
         in done.stderr
     )
+
+
+def newer_verdicts(pairs: list[tuple[str, str]]) -> list[bool]:
+    """What release.sh's version_newer says for each (new, current) pair."""
+    calls = "\n".join(
+        f"version_newer {new} {current} && echo yes || echo no"
+        for new, current in pairs
+    )
+    done = subprocess.run(
+        [BASH, "-c", f"source {shlex.quote(str(SCRIPT))}\n{calls}"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return [line == "yes" for line in done.stdout.split()]
+
+
+def test_the_version_order_matches_pep_440() -> None:
+    currents = ["0.2.4", "0.3.0.dev0", "0.3.0.dev5", "0.3.1.dev2", "0.3.0", "0.10.0"]
+    news = ["0.2.9", "0.3.0", "0.3.1", "0.4.0", "0.9.9", "0.10.0", "1.0.0"]
+    pairs = [(new, current) for current in currents for new in news]
+    verdicts = newer_verdicts(pairs)
+    assert len(verdicts) == len(pairs)
+    for (new, current), newer in zip(pairs, verdicts, strict=True):
+        assert newer == (Version(new) > Version(current)), (new, current)
 
 
 def test_a_dev_version_goes_through_the_whole_release(sandbox: Sandbox) -> None:
