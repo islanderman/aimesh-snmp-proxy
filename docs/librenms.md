@@ -153,19 +153,15 @@ sudo -u librenms /opt/librenms/lnms device:discover HOSTNAME
 
 ## Wait before you run discovery
 
-After every start of the service, the detail of each device needs time to return. The detail is
-uptime, temperatures, RAM, channel frequency, and CPU cores. A detail poll runs every
-`topology_interval_s` seconds, 300 by default. The first poll brings everything but the CPU cores.
-Cores need a second poll, because the router reports running totals and the proxy computes the load
-from their difference.
-
-The root device polls at the start. In `per_node` mode, each node polls at its own offset inside the
-interval, so its second poll can come almost two intervals after the start.
+After every start of the service, the detail of each device needs time to return: uptime,
+temperatures, RAM, channel frequency, and CPU cores. A detail poll runs every `topology_interval_s`
+seconds, 300 by default. CPU cores need two polls, and in `per_node` mode each node polls at its own
+offset in the interval. See [CPU and memory](reference/metrics.md#cpu-and-memory) for why.
 
 A discovery in that gap sees no cores and no sensors, so LibreNMS removes them. Wait 6 minutes after
 a restart. In `per_node` mode, wait 11 minutes. If you changed `topology_interval_s`, wait that many
-seconds plus one minute, or twice that in `per_node` mode. Keep `topology_interval_s` at 540 or
-lower: the proxy drops detail older than 600 seconds.
+seconds plus one minute, or twice that in `per_node` mode. Keep it at 540 or lower. See
+[`[collector]`](reference/configuration.md#collector).
 
 If LibreNMS already removed sensors, run discovery again after the detail returns.
 

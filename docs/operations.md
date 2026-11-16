@@ -111,11 +111,9 @@ Keep the old bundle folders in `/usr/local/src`. To go back:
 2. Run `sudo ./deploy/install.sh` from the old bundle folder.
 3. Start the services.
 
-The state files carry a format version. `ports.json` and `onboarded.json` fail closed: an older
-service refuses a newer format and leaves the file untouched. `lockout.json` and `counters.json`
-start empty when the format is unknown, and the service overwrites them. Then it forgets the login
-budget, and the octet counters restart. Read the changelog before you roll back across a release
-that changes a state file.
+The state files carry a format version, and an older service can refuse or reset a newer one. See
+[State files](reference/configuration.md#state-files) for what each file does when its format is
+unknown. Read the changelog before you roll back across a release that changes a state file.
 
 ## Rotate secrets
 
