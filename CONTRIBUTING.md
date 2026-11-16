@@ -44,11 +44,17 @@ pre-commit run -a
 | Command             | What it does                                                                                               |
 | ------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `make test`         | Runs `pytest` with coverage. It fails below 75 percent                                                     |
+| `make test-deploy`  | Runs `deploy/install.sh` and the units through bash against stubbed system tools                           |
 | `make test-matrix`  | Runs the tests on Python 3.11, 3.12, 3.13, and 3.14, each in its own venv                                  |
-| `make check`        | Runs `ruff format --check`, `ruff check`, `uv lock --check`, and the Markdown checks                       |
+| `make lint`         | Runs `ruff format --check` and `ruff check`                                                                |
+| `make shellcheck`   | Runs `shellcheck` on the shell scripts                                                                     |
+| `make check`        | Runs `make lint`, `uv lock --check`, `shellcheck`, `markdownlint`, and `prettier --check`                  |
 | `pre-commit run -a` | Runs every pre-commit hook on every file                                                                   |
-| `make audit`        | Checks the locked runtime packages, except `asusrouter`, against the PyPI advisory database. Needs network |
+| `make build`        | Builds the sdist and the wheel into `dist/`                                                                |
 | `make bundle`       | Builds the release bundle into `dist/`. Needs network                                                      |
+| `make audit`        | Checks the locked runtime packages, except `asusrouter`, against the PyPI advisory database. Needs network |
+
+`make check` skips a tool that is not installed.
 
 The hooks run `ruff`, `shellcheck`, `actionlint`, `gitleaks`, `markdownlint`, `prettier`, and basic
 file checks. `ruff` also formats the Python code blocks in Markdown files. Some hooks fix files in
