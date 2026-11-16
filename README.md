@@ -65,12 +65,12 @@ sudo ./deploy/install.sh
 
 **3. Generate the config.** `init` asks for the router address and the admin password. It pins the
 router certificate after you compare the fingerprint, detects AiMesh nodes, and writes the config
-and the secrets. `--force` replaces the files that the installer seeded. Run the installer again so
-the unit can reach the router.
+and the secrets. It replaces the files that the installer seeded, and your own edits only with
+`--force`. Run the installer again so the unit can reach the router.
 
 ```sh
 APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
-sudo $APP init --detect --force
+sudo $APP init --detect
 sudo ./deploy/install.sh
 ```
 
