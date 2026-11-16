@@ -1,6 +1,6 @@
 [project]
 name = "aimesh-snmp-proxy"
-version = "0.3.0.dev0"
+version = "0.3.0"
 description = "Serve stock-firmware ASUS routers, AiMesh nodes, APs and media bridges over SNMP for LibreNMS"
 readme = "README.md"
 license = "Apache-2.0"
