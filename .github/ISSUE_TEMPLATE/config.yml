@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/islanderman/aimesh-snmp-proxy/security/advisories/new
+    about: Report it privately. Do not open a public issue.
+  - name: Onboarding guide and documentation
+    url: https://islanderman.github.io/aimesh-snmp-proxy/
+    about: Read the install and troubleshooting pages before you open an issue.
