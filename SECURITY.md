@@ -29,7 +29,7 @@ scope:
   SNMP answers
 - a way to reach the SNMP ports from another host, or to run code through a crafted router
   response or SNMP request
-- a flaw in `deploy/install.sh`, the offline bundle or the systemd units that gives a local user
+- a flaw in `deploy/install.sh`, the install bundle or the systemd units that gives a local user
   more access than intended
 
 Out of scope:
