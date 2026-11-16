@@ -15,6 +15,9 @@ with code 78. See [Command line](cli.md#check-config).
 - The command line reads the file from `-c FILE`, else from `$AIMESH_PROXY_CONFIG`, else from
   `/etc/aimesh-snmp-proxy/config.toml`. The systemd unit passes its own copy:
   `${CREDENTIALS_DIRECTORY}/config.toml`. Restart the service after every edit.
+- The unit builds its address allow list from the config. Run `install.sh` again after you change
+  `asus.host`, `asus.node_ca_file`, an override `ca_file`, or, in `per_node` mode, `collector.mode`
+  or `nodes.expected`.
 - `state_dir` is the only key outside a table. Put it first, before any `[section]`.
 - `[asus]` and `[snmp]` are required. `[nodes]`, `[snmp.v3]`, `[collector]`, `[logging]`, and
   `[onboard]` are optional. `[[override]]` repeats once for each node you change.
@@ -169,7 +172,7 @@ instead of it. All keys sit in one `[snmp.v3]` table.
 - Each passphrase has at least 8 characters.
 - `auth` and `priv` ignore case: `sha-256` works.
 - The unit loads only the files that the default config names. Add a `LoadCredential=` line for each
-  v3 key file in a drop-in. See [Secret files](#secret-files).
+  v3 key file in a drop-in. See [Credentials the unit loads](#credentials-the-unit-loads).
 - `onboard` adds v2c devices only. It needs `community_file`, even when v3 is on.
 
 ```toml
@@ -202,7 +205,18 @@ How the proxy polls the router.
 - `topology_interval_s`: also the interval of the device detail: uptime, CPU cores, RAM, temperatures,
   and channels.
 
-Modes:
+```toml
+[collector]
+mode = "root_only"
+stale_after_s = 180
+metrics_interval_s = 60
+topology_interval_s = 300
+request_timeout_s = 10
+```
+
+### Collector modes
+
+The key `mode` picks one of two modes.
 
 | Mode        | Router logins                 | What it adds                                                                                                           |
 | ----------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -216,15 +230,6 @@ Modes:
   `per_node` off for that node for 24 hours.
 - A standalone router, access point, or media bridge has no nodes. It reports its own detail in
   either mode. Use `root_only`.
-
-```toml
-[collector]
-mode = "root_only"
-stale_after_s = 180
-metrics_interval_s = 60
-topology_interval_s = 300
-request_timeout_s = 10
-```
 
 ## `[logging]`
 
@@ -300,10 +305,71 @@ you leave as they are. Environment variables cannot set overrides.
 ```toml
 [[override]]
 match = "192.168.50.12"        # or a MAC: "00:00:5e:00:53:12"
-sys_name = "aimesh-example"
+sys_name = "aimesh-node-b"
 port = 16150
 login = true
-location = "Second floor"
+location = "Room 2"
+ca_file = "node-12.pem"
+
+[[override]]
+match = "00:00:5e:00:53:13"
+exclude = true
+```
+
+## Complete example
+
+This file sets every key. Replace the addresses and the file names with your own.
+
+```toml
+state_dir = "/var/lib/aimesh-snmp-proxy"
+
+[asus]
+host = "192.168.50.1"
+port = 8443
+use_ssl = true
+username = "admin"
+password_file = "asus_password"
+ca_file = "asus_router.pem"
+node_ca_file = "asus_node_ca.pem"
+
+[nodes]
+expected = ["192.168.50.11-19"]
+
+[snmp]
+bind = "127.0.0.1"
+port_base = 16101
+profile = "asuswrt-merlin"
+community_file = "snmp_community"
+
+[snmp.v3]
+user = "librenms"
+auth = "SHA-256"
+auth_key_file = "snmp_auth_key"
+priv = "AES-128"
+priv_key_file = "snmp_priv_key"
+
+[collector]
+mode = "per_node"
+stale_after_s = 180
+metrics_interval_s = 60
+topology_interval_s = 300
+request_timeout_s = 10
+
+[logging]
+level = "INFO"
+
+[onboard]
+url = "https://192.168.50.10"
+token_file = "librenms_token"
+ca_file = "librenms.pem"
+hostname = "sysname"
+
+[[override]]
+match = "192.168.50.12"
+sys_name = "aimesh-node-b"
+port = 16150
+login = true
+location = "Room 2"
 ca_file = "node-12.pem"
 
 [[override]]
@@ -351,10 +417,25 @@ config error: asus.password_file: file not found in /etc/aimesh-snmp-proxy; the 
 
 The message never prints the value you typed, because it may be the secret.
 
-Under the systemd unit, `install.sh` creates the folder `/etc/aimesh-snmp-proxy` (mode `0700`) with
-empty placeholder files for the password, the community, and the router certificate. The unit copies
-these files into a private credentials folder at start. A file outside the default names needs a
-`LoadCredential=` line in a drop-in; run `systemctl edit aimesh-snmp-proxy` and add, for SNMPv3:
+## Credentials the unit loads
+
+Under systemd, the unit copies a fixed set of files into a private credentials folder when the
+service starts. The proxy reads them from there. `install.sh` creates the folder
+`/etc/aimesh-snmp-proxy` (mode `0700`) with the example `config.toml` and an empty file for each of
+the other names:
+
+| Credential        | Config key            |
+| ----------------- | --------------------- |
+| `config.toml`     | the config itself     |
+| `asus_password`   | `asus.password_file`  |
+| `snmp_community`  | `snmp.community_file` |
+| `asus_router.pem` | `asus.ca_file`        |
+
+`install.sh` adds one more credential for `asus.node_ca_file` and one for each override `ca_file`. It
+reads the key names from `config.toml`. Run it again after you add a pin.
+
+Any other file needs a drop-in. SNMPv3 key files are the common case. Run
+`systemctl edit aimesh-snmp-proxy` and add:
 
 ```ini
 [Service]
@@ -362,13 +443,14 @@ LoadCredential=snmp_auth_key:/etc/aimesh-snmp-proxy/snmp_auth_key
 LoadCredential=snmp_priv_key:/etc/aimesh-snmp-proxy/snmp_priv_key
 ```
 
-`install.sh` adds the credentials for `asus.node_ca_file` and each `override.ca_file` itself. Run it
-again after you add one. The `[onboard]` files are not credentials: you run `onboard` by hand, and it
-reads them from the folder of the config file. See [Installation](../installation.md).
+For an instance, edit `aimesh-snmp-proxy@NAME` and use the folder `/etc/aimesh-snmp-proxy/NAME/`.
+
+The `[onboard]` files are not credentials: you run `onboard` by hand, and it reads them from the
+folder of the config file.
 
 Keep the relative file names. The service user cannot read the folder `/etc/aimesh-snmp-proxy`, so an
 absolute path into it fails under the unit. The unit reads a relative name from its credentials
-folder.
+folder. See [Installation](../installation.md).
 
 ## Environment variables
 
@@ -450,11 +532,11 @@ sudo /opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy \
   -c /etc/aimesh-snmp-proxy/NAME/config.toml check-config
 ```
 
-This config belongs to an access point in an instance called `second-ap`:
+This config belongs to an access point in an instance called `lab`:
 
 ```toml
-# /etc/aimesh-snmp-proxy/second-ap/config.toml
-state_dir = "/var/lib/aimesh-snmp-proxy-second-ap"
+# /etc/aimesh-snmp-proxy/lab/config.toml
+state_dir = "/var/lib/aimesh-snmp-proxy-lab"
 
 [asus]
 host = "192.168.50.2"
@@ -468,7 +550,7 @@ community_file = "snmp_community"
 
 [[override]]
 match = "192.168.50.2"
-sys_name = "aimesh-second-ap"
+sys_name = "aimesh-lab"
 ```
 
 See [Multiple routers](../instances.md) for the full steps.
