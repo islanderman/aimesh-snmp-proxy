@@ -1,0 +1,57 @@
+# aimesh-snmp-proxy example: copy to /etc/aimesh-snmp-proxy/config.toml.
+# One config per router on stock ASUS firmware: an AiMesh root (it serves every
+# node), or a standalone router, access point or media bridge (one root node).
+# Relative *_file paths resolve against $CREDENTIALS_DIRECTORY (systemd
+# LoadCredential=), else this file's directory. Secret files must be chmod 600.
+
+# Must survive restarts: ports.json (port pins), counters.json, lockout.json.
+state_dir = "/var/lib/aimesh-snmp-proxy"
+
+[asus]
+host = "192.168.50.1"          # the router's LAN IP (an IP, not a name)
+port = 8443                    # router HTTPS port
+use_ssl = true                 # must stay true: HTTP sends the login in cleartext
+username = "admin"
+password_file = "asus_password"
+ca_file = "asus_router.pem"    # exported router certificate, the only one trusted
+# node_ca_file = "asus_node_ca.pem"  # per_node: the CA of the node certs (--pin-node-ca)
+
+# AiMesh node IPs, if any: a standalone router, AP or media bridge needs no [nodes].
+[nodes]
+expected = "192.168.50.101-110" # reserves port indexes 1-10, in this order
+
+[snmp]
+bind = "127.0.0.1"             # the only accepted value
+port_base = 16101              # root port; node N serves port_base + N
+profile = "asuswrt-merlin"
+community_file = "snmp_community"
+
+# Optional SNMPv3 authPriv, beside or instead of the v2c community:
+# [snmp.v3]
+# user = "librenms"
+# auth = "SHA-256"
+# auth_key_file = "snmp_auth_key"
+# priv = "AES-128"
+# priv_key_file = "snmp_priv_key"
+
+[collector]
+mode = "root_only"             # per_node adds one router login per node
+stale_after_s = 180            # older data is never served
+metrics_interval_s = 60
+topology_interval_s = 300
+request_timeout_s = 10
+
+[logging]
+level = "INFO"
+
+# Only `onboard` reads [onboard]: use a one-shot token file, revoke it after use.
+# [onboard]
+# url = "https://192.168.50.10"
+# token_file = "librenms_token"
+# ca_file = "librenms.pem"     # optional pin for the LibreNMS HTTPS certificate
+# hostname = "sysname"         # or "ip": name each device by its node's LAN IP
+
+# [[override]]
+# match = "192.168.50.101"     # IP or MAC; a MAC survives DHCP changes
+# sys_name = "aimesh-hall"
+# login = false                # skip the per_node login for this node
