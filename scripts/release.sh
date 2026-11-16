@@ -131,7 +131,7 @@ unreleased_has_content() { # exit 0: has notes, 1: empty, 2: no Unreleased headi
       found = found || in_section
       next
     }
-    in_section && $0 !~ /^[[:space:]]*$/ && $0 !~ /^#/ && $0 !~ /^\[[^]]+\]:/ { content = 1 }
+    in_section && $0 !~ /^[[:space:]]*$/ && $0 !~ /^#/ && $0 !~ /^\[.+\]:/ { content = 1 }
     END {
       if (!found) exit 2
       exit (content ? 0 : 1)
@@ -154,7 +154,7 @@ rotate_changelog() { # rotate_changelog VERSION DATE
 # The first release has no compare link to move: those lines pass through unchanged.
 update_links() { # update_links VERSION
   awk -v ver="$1" '
-    /^\[Unreleased\]:[[:space:]]/ && match($0, /\/compare\/v[0-9][0-9.]*\.\.\.[^[:space:]]+$/) {
+    /^\[Unreleased\]:[[:space:]]/ && match($0, /\/compare\/v[0-9][0-9.]*\.\.\.[^ \t]+$/) {
       base = substr($0, 1, RSTART - 1)
       sub(/^\[Unreleased\]:[[:space:]]*/, "", base)
       prev = substr($0, RSTART + 9)
@@ -179,11 +179,12 @@ changelog_notes() { # changelog_notes VERSION
       sub(/^## \[?v?/, "", head)
       if (index(head, ver) == 1) {
         rest = substr(head, length(ver) + 1)
-        if (rest == "" || rest ~ /^[] ]/) found = 1
+        lead = substr(rest, 1, 1)
+        if (lead == "" || lead == "]" || lead == " ") found = 1
       }
       next
     }
-    found && $0 !~ /^\[[^]]+\]:[[:space:]]/ { line[++n] = $0 }
+    found && $0 !~ /^\[.+\]:[[:space:]]/ { line[++n] = $0 }
     END {
       first = 1
       while (first <= n && line[first] ~ /^[[:space:]]*$/) first++
