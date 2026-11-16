@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.venv-*/
+build/
+dist/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Docs build output
+site/
+
+# Local secrets, config and state: never commit them
+*.pem
+*.key
+*_password
+*_token
+*_key
+*_community
+secrets/
+state/
+.env
+.env.*
+/config.toml
+/*.local.toml
+
+# Logs
+*.log
+
+# Editors and OS
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Claude Code session state
+.claude/

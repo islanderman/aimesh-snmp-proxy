@@ -1,0 +1,13 @@
+# Byte-exact captures and generated output: never reformat.
+tests/fixtures/
+
+# Local environments, caches and build output.
+.venv/
+.venv-*/
+node_modules/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+dist/
+build/
+site/
