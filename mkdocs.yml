@@ -1,0 +1,95 @@
+site_name: aimesh-snmp-proxy
+site_description: Monitor ASUS routers, AiMesh nodes, access points, and media bridges in LibreNMS over SNMP.
+site_url: https://islanderman.github.io/aimesh-snmp-proxy/
+site_author: Jerry Yang
+copyright: Copyright 2026 Jerry Yang. Licensed under the Apache License, Version 2.0.
+
+repo_url: https://github.com/islanderman/aimesh-snmp-proxy
+repo_name: islanderman/aimesh-snmp-proxy
+edit_uri: edit/main/docs/
+
+# A warning fails the build, so a broken link or an orphan page never ships.
+strict: true
+
+# The pinned requirements are build inputs, not site content.
+exclude_docs: |
+  requirements.in
+  requirements.txt
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: warn
+    unrecognized_links: warn
+    anchors: warn
+
+theme:
+  name: material
+  language: en
+  # No web fonts: readers load nothing from a third-party host.
+  font: false
+  features:
+    - content.action.edit
+    - content.code.copy
+    - navigation.footer
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - toc.follow
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  # contributing.md and changelog.md include the root files, so each has one source.
+  - pymdownx.snippets:
+      base_path: ['.']
+      check_paths: true
+
+nav:
+  - Home: index.md
+  - Get started:
+      - Installation: installation.md
+      - Choose your path: onboarding/index.md
+      - AiMesh root with nodes: onboarding/aimesh.md
+      - Standalone router: onboarding/router.md
+      - Access point: onboarding/access-point.md
+      - Media bridge: onboarding/media-bridge.md
+      - Write the config by hand: onboarding/manual.md
+  - Guides:
+      - Multiple routers: instances.md
+      - LibreNMS: librenms.md
+      - Operations: operations.md
+  - Reference:
+      - Configuration keys: reference/configuration.md
+      - Command line: reference/cli.md
+      - Served metrics: reference/metrics.md
+  - Help:
+      - Troubleshooting: troubleshooting.md
+      - FAQ: faq.md
+  - Project:
+      - Security model: security.md
+      - Contributing and releasing: contributing.md
+      - Changelog: changelog.md

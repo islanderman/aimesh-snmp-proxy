@@ -1,0 +1,3 @@
+# Top-level docs dependencies. docs/requirements.txt is compiled from this file.
+mkdocs==1.6.1
+mkdocs-material==9.8.1
