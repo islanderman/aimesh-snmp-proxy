@@ -35,12 +35,12 @@ the value to a file name. Treat that secret as exposed and replace it.
 
 ## The service does not start
 
-| Symptom                                | Cause                                                        | Fix                                                                                                                   |
-| -------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `status=78` and no restart             | A config error                                               | Fix the key, then `systemctl start`                                                                                   |
-| `243/CREDENTIALS`                      | A file that the unit loads is missing                        | Create the file again. `install.sh` recreates only the empty `asus_password`, `snmp_community`, and `asus_router.pem` |
-| `start request repeated too quickly`   | 5 failed starts in 15 minutes. The limit protects the router | Fix the cause, then `sudo systemctl reset-failed aimesh-snmp-proxy`                                                   |
-| `status=31/SYS` or an `mprotect` error | The sandbox filter is unverified with Python 3.14            | See below                                                                                                             |
+| Symptom                                         | Cause                                                        | Fix                                                                                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `status=78` and no restart                      | A config error                                               | Fix the key, then `systemctl start`                                                                                   |
+| `243/CREDENTIALS`                               | A file that the unit loads is missing                        | Create the file again. `install.sh` recreates only the empty `asus_password`, `snmp_community`, and `asus_router.pem` |
+| `start request repeated too quickly`            | 5 failed starts in 15 minutes. The limit protects the router | Fix the cause, then `sudo systemctl reset-failed aimesh-snmp-proxy`                                                   |
+| `status=31/SYS` (SIGSYS) or an `mprotect` error | The sandbox filter is unverified with Python 3.14            | See below                                                                                                             |
 
 For the last row, disable the memory filter in a drop-in and report the problem in an issue:
 
