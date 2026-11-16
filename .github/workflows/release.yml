@@ -1,0 +1,83 @@
+name: Release
+
+# The tag push that `scripts/release.sh --tag` makes runs this workflow. It never commits or pushes.
+# A manual run builds and uploads the files for a rehearsal and publishes nothing.
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build the release files
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.9.28'
+          enable-cache: false
+      - name: Check the tag against the version, the changelog and main
+        if: github.ref_type == 'tag'
+        run: scripts/release.sh --verify "$GITHUB_REF_NAME"
+      - name: Write the release notes from the changelog
+        if: github.ref_type == 'tag'
+        run: scripts/release.sh --notes "${GITHUB_REF_NAME#v}" > release-notes.md
+      - name: Build the sdist and the wheel
+        run: uv build --out-dir dist
+      - name: Build the offline bundle
+        run: deploy/build-bundle.sh --out-dir dist
+      - name: Write SHA256SUMS
+        working-directory: dist
+        run: |
+          sha256sum -- *.whl *.tar.gz > SHA256SUMS
+          cat SHA256SUMS
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-files
+          path: |
+            dist/*
+            release-notes.md
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Attest and publish the release
+    # Only the tag push publishes: a manual run stops after the build.
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # create the release and upload its files
+      id-token: write # sign the attestations with this workflow's identity
+      attestations: write # store the attestations on GitHub
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-files
+          path: release
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: release/dist/*
+      # A draft takes every file before it goes public, so no visitor sees a release without them.
+      - name: Create the draft release, upload every file, then publish it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" release/dist/* --title "$TAG" \
+            --notes-file release/release-notes.md --verify-tag --draft
+          gh release edit "$TAG" --draft=false
