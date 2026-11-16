@@ -116,30 +116,32 @@ Only a maintainer releases. `scripts/release.sh` needs the GitHub CLI (`gh`), a 
 and a git author and committer email that match the maintainer's address. It reads the changelog and
 the version, so keep `## [Unreleased]` in `CHANGELOG.md` current as changes merge.
 
-1. Rehearse. This prints the plan and the release notes. It changes nothing.
+**1. Rehearse.** This prints the plan and the release notes. It changes nothing.
 
-   ```sh
-   scripts/release.sh --dry-run X.Y.Z
-   ```
+```sh
+scripts/release.sh --dry-run X.Y.Z
+```
 
-2. Open the release pull request. The script creates the branch `release/vX.Y.Z` from `origin/main`.
-   It sets the version in `pyproject.toml` and `uv.lock`, dates the changelog section, commits
-   `chore(release): vX.Y.Z`, pushes the branch, and opens the pull request.
+**2. Open the release pull request.** The script creates the branch `release/vX.Y.Z` from
+`origin/main`. It sets the version in `pyproject.toml` and `uv.lock`, dates the changelog section,
+commits `chore(release): vX.Y.Z`, pushes the branch, and opens the pull request.
 
-   ```sh
-   scripts/release.sh X.Y.Z
-   ```
+```sh
+scripts/release.sh X.Y.Z
+```
 
-3. Merge the pull request with a rebase merge. Wait for CI to pass on `main`.
-4. Tag the merged commit. The script checks CI, creates the annotated tag `vX.Y.Z`, and pushes it.
+**3. Merge the pull request** with a rebase merge. Wait for CI to pass on `main`.
 
-   ```sh
-   scripts/release.sh --tag X.Y.Z
-   ```
+**4. Tag the merged commit.** The script checks CI, creates the annotated tag `vX.Y.Z`, and pushes
+it.
 
-5. The tag push runs the release workflow. It builds the wheel, the sdist, and the offline bundle,
-   writes `SHA256SUMS`, attests every file, and publishes the GitHub release with the notes from
-   `CHANGELOG.md`. No workflow commits or pushes.
+```sh
+scripts/release.sh --tag X.Y.Z
+```
+
+**5. Let the workflow publish.** The tag push runs the release workflow. It builds the wheel, the
+sdist, and the offline bundle, writes `SHA256SUMS`, attests every file, and publishes the GitHub
+release with the notes from `CHANGELOG.md`. No workflow commits or pushes.
 
 Run `scripts/smoke-test.sh` before you tag. It builds the release files, installs the bundle into a
 fresh environment, and runs the CLI against the bundled example config. It needs `uv`, `git`, `tar`,
