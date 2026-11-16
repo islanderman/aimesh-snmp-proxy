@@ -788,11 +788,11 @@ do_install() {
     cat <<EOF
 
 Installed $NAME $VERSION as instance $INSTANCE. The service is not enabled and not started. Next:
-  1. fill $CONF_DIR/asus_password and $CONF_DIR/snmp_community (mode 0600)
-  2. edit $CONF_DIR/config.toml: asus.host (re-run this script after changing it) and
-     an snmp.port_base no other service uses
-  3. pin the router certificate, run check-config and selftest with
-     --config $CONF_DIR/config.toml, then systemctl enable --now $NAME@$INSTANCE
+  1. sudo $PREFIX/venv/bin/$NAME init --detect --instance $INSTANCE
+     (writes $CONF_DIR/config.toml, its secrets and the router pin, on a free port_base)
+  2. run this script again with --instance $INSTANCE (the unit allows only config.toml's IPs)
+  3. run check-config and selftest with --config $CONF_DIR/config.toml, then
+     systemctl enable --now $NAME@$INSTANCE
   4. systemd-analyze security $SERVICE (README.md has the commands)
 EOF
     return 0
@@ -800,10 +800,10 @@ EOF
   cat <<EOF
 
 Installed $NAME $VERSION. The service is not enabled and not started. Next:
-  1. fill $ETC_DIR/asus_password and $ETC_DIR/snmp_community (mode 0600)
-  2. edit $ETC_DIR/config.toml; re-run this script after changing asus.host
-  3. pin the router certificate, run check-config and selftest, then
-     systemctl enable --now $NAME (README.md has the commands)
+  1. sudo $PREFIX/venv/bin/$NAME init --detect
+     (writes config.toml, its secrets and the router pin; check the fingerprint it shows)
+  2. run this script again (the unit allows only config.toml's IPs)
+  3. run check-config and selftest, then systemctl enable --now $NAME (README.md has the commands)
   4. systemd-analyze security $NAME (the unit is also checked above when systemd-analyze exists)
 EOF
 }

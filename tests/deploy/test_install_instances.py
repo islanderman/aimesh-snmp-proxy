@@ -123,6 +123,18 @@ def test_instance_install_creates_its_own_tree(host, repo):
     ]
 
 
+def test_instance_next_steps_start_with_init_for_that_instance(host):
+    result = host.run("--instance", "ap109")
+    assert result.returncode == 0, result.stderr
+    steps = [s.strip() for s in result.stdout.split("Next:", 1)[1].strip().splitlines()]
+    app = "/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy"
+    assert steps[0] == f"1. sudo {app} init --detect --instance ap109"
+    assert steps[2].startswith("2. run this script again with --instance ap109 (")
+    assert steps[3].startswith("3. run check-config and selftest with --config ")
+    edits = [s for s in steps if "fill " in s or "edit " in s or "asus_password" in s]
+    assert edits == []
+
+
 def test_instance_install_shares_the_venv_and_adds_no_single_service(host):
     assert host.run("--instance", "ap109").returncode == 0
     assert (host.opt / "venv" / "bin" / "python").exists()
