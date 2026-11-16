@@ -72,8 +72,8 @@ After you fix the cause, clear the latch and the backoff:
 sudo systemctl kill -s HUP aimesh-snmp-proxy
 ```
 
-As a last resort, stop the service, delete `lockout.json`, and start it again. This also resets
-the login budget.
+As a last resort, stop the service, delete `lockout.json`, and start it again. This also resets the
+login budget.
 
 ```sh
 sudo systemctl stop aimesh-snmp-proxy
@@ -81,8 +81,8 @@ sudo rm /var/lib/aimesh-snmp-proxy/lockout.json
 sudo systemctl start aimesh-snmp-proxy
 ```
 
-For a CAPTCHA or a reset latch, the service logs `still latched` and checks once an hour whether
-the router is reachable. It never sends credentials during that check.
+For a CAPTCHA or a reset latch, the service logs `still latched` and checks once an hour whether the
+router is reachable. It never sends credentials during that check.
 
 ## The log shows a TLS pin mismatch
 
@@ -105,7 +105,7 @@ sudo systemctl restart aimesh-snmp-proxy
 
 For a node, the message reads `TLS verification failed: node CA ...`. The node certificate must come
 from the pinned CA and must name the node IP. Pin again with `discover --pin-node-ca`. If a node has
-its own certificate, pin that one with `discover --pin-cert PATH --node MAC` and set `ca_file` in its
+its own certificate, pin that one with `discover --pin-cert PATH --node IP` and set `ca_file` in its
 `[[override]]`. Then run `install.sh` again so the unit loads the new file.
 
 ## `discover` finds no nodes
@@ -125,8 +125,8 @@ its own certificate, pin that one with `discover --pin-cert PATH --node MAC` and
 | `budget`         | The local limit of 6 logins per hour is used     | Wait. Stop restarting the service                                                           |
 | `login latched`  | A latch from an earlier run still holds          | See [The log says latched](#the-log-says-latched)                                           |
 
-`pin-cert: cannot fetch the certificate from HOST:PORT` means the TCP or TLS connection failed. Check
-that HTTPS login is on and that the port is right.
+`pin-cert: cannot fetch the certificate from HOST:PORT` means the TCP or TLS connection failed.
+Check that HTTPS login is on and that the port is right.
 
 Run `discover` and `selftest` while the service is stopped. They log in to the router, and a second
 login clashes with the proxy session. `check-config` reads files only and never contacts the router.
@@ -188,9 +188,10 @@ session uses the 6 logins per hour of that node.
 
 ## A port is busy
 
-The log says `retrying, at most every 60 s`, and a node has no engine. Another program holds the
-UDP port. Find it with `sudo ss -ulpn | grep PORT`. Free the port, or pick another `snmp.port_base`
-and run `install.sh` again. A port belongs to one service only, so the installer refuses a shared
+The log says `retrying, at most every 60 s`, and a node has no engine. Another program holds the UDP
+port. Find it with `sudo ss -ulpn | grep PORT`. Free the port. Pick another `snmp.port_base` only
+before you run `onboard`: a new base moves every device, and LibreNMS keeps the old ports. Then run
+`install.sh` again. A port belongs to one service only, so the installer refuses a shared
 `port_base`.
 
 ## Report a problem

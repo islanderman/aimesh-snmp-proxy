@@ -4,8 +4,8 @@ Monitor ASUS routers in LibreNMS over SNMP. No agent runs on the router.
 
 aimesh-snmp-proxy is a service for the Linux host that runs LibreNMS. It logs in to an ASUS router
 with stock firmware over HTTPS, reads its status, and answers SNMP on `127.0.0.1`. LibreNMS polls it
-like any other SNMP device. Each AiMesh node, standalone router, access point, or media bridge
-shows up as its own wireless device.
+like any other SNMP device. Each AiMesh node, standalone router, access point, or media bridge shows
+up as its own device with wireless sensors.
 
 ## What LibreNMS shows
 
