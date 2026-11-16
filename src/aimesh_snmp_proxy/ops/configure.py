@@ -18,6 +18,7 @@ import argparse
 import asyncio
 import contextlib
 import getpass
+import hashlib
 import ipaddress
 import os
 import re
@@ -80,6 +81,15 @@ TOKEN_FILE = "librenms_token"  # noqa: S105 - a file name, not a secret
 SECRET_MODE = 0o600
 PUBLIC_MODE = 0o644
 QUESTION_TRIES = 3
+SEED_STATE_DIR = "/var/lib/aimesh-snmp-proxy"  # install.sh's STATE_LINE
+MAX_SEED_BYTES = 65536
+# config.example.toml as install.sh seeds it (seed_digest). A test fails when the
+# example changes: add the new digest, keep the old ones for older bundles.
+SEED_DIGESTS = frozenset(
+    {
+        "8bca861e2d0cd8a496d3e0e1efdada1b0c1bb28efe2bf0f4c42775418546a150",
+    }
+)
 
 
 class InitError(Exception):
@@ -460,6 +470,32 @@ def _read_certificate(path: Path) -> bytes:
     return data
 
 
+def seed_digest(text: str, instance: str | None = None) -> str:
+    """SHA-256 of a config install.sh seeded, its instance's state_dir line undone."""
+    lines = text.splitlines()
+    if instance:
+        own = f'state_dir = "{SEED_STATE_DIR}-{instance}"'
+        seeded = f'state_dir = "{SEED_STATE_DIR}"'
+        lines = [seeded if line == own else line for line in lines]
+    return hashlib.sha256("\n".join([*lines, ""]).encode()).hexdigest()
+
+
+def _placeholder(path: Path, instance: str | None) -> bool:
+    """An empty file, or config.toml just as install.sh seeded it: nothing to lose."""
+    try:
+        st = os.lstat(path)
+        if not stat.S_ISREG(st.st_mode) or st.st_size > MAX_SEED_BYTES:
+            return False
+        if st.st_size == 0:
+            return True
+        if path.name != CONFIG_FILE:
+            return False
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+    return seed_digest(text, instance) in SEED_DIGESTS
+
+
 def _quote(path: Path) -> str:
     return shlex.quote(str(path))
 
@@ -713,7 +749,7 @@ class _Init:
             a.output_dir or (ETC_DIR / instance if instance else ETC_DIR)
         ).absolute()
         if not a.force:
-            self.refuse_existing(output, a.librenms_ca)
+            self.refuse_existing(output, a.librenms_ca, instance)
         host = self.value(a.host, "Router IPv4 address", DEFAULT_HOST, check_host)
         port = self.value(
             a.port, "Router HTTPS port", str(DEFAULT_ROUTER_PORT), check_port
@@ -760,7 +796,7 @@ class _Init:
                 _optional(Path),
             )
         if not a.force:
-            self.refuse_existing(output, ca)
+            self.refuse_existing(output, ca, instance)
         plan = Plan(
             host=host,
             port=port,
@@ -775,15 +811,21 @@ class _Init:
         )
         return _Answers(instance, output, plan, detect, self.password(), ca)
 
-    def refuse_existing(self, output: Path, librenms_ca: Path | None) -> None:
+    def refuse_existing(
+        self, output: Path, librenms_ca: Path | None, instance: str | None
+    ) -> None:
+        """Refuse to replace a file that holds anything but install.sh's seed."""
         names = [CONFIG_FILE, PASSWORD_FILE, COMMUNITY_FILE]
         if librenms_ca is not None:
             names.append(LIBRENMS_CA_FILE)
-        existing = [name for name in names if _exists(output / name)]
+        existing = [
+            name
+            for name in names
+            if _exists(output / name) and not _placeholder(output / name, instance)
+        ]
         if existing:
             raise InitError(
-                f"{output} already holds {', '.join(existing)}: pass --force to "
-                "replace (install.sh seeds config.toml and empty secret files)"
+                f"{output} already holds {', '.join(existing)}: pass --force to replace"
             )
 
     # --- the run ---------------------------------------------------------------------
@@ -818,8 +860,8 @@ class _Init:
         if self.args.dry_run:
             self.show(answers, text, names)
             return EXIT_OK
-        replaced = self.install(stage, answers.output, names, pinned=pinned)
-        self.report(answers, plan, names, replaced, pinned)
+        replaced, seeds = self.install(answers, stage, names, pinned=pinned)
+        self.report(answers, plan, names, (replaced, seeds), pinned)
         return EXIT_OK
 
     def detect(self, plan: Plan, stage: Path, answers: _Answers) -> Plan:
@@ -897,16 +939,19 @@ class _Init:
             raise InitError(f"config error: {message}", EXIT_CONFIG) from None
 
     def install(
-        self, stage: Path, output: Path, names: list[str], *, pinned: bool
-    ) -> list[str]:
+        self, answers: _Answers, stage: Path, names: list[str], *, pinned: bool
+    ) -> tuple[list[str], list[str]]:
         """Copy the staged files in, config.toml last: it names the others.
 
         A pin is checked only when this run made it: install.sh's empty
         placeholder waits for discover --pin-cert.
         """
+        output = answers.output
         try:
             output.mkdir(mode=0o700, parents=True, exist_ok=True)
-            replaced = [name for name in names if _exists(output / name)]
+            present = [name for name in names if _exists(output / name)]
+            seeds = [n for n in present if _placeholder(output / n, answers.instance)]
+            replaced = [name for name in present if name not in seeds]
             for name in names:
                 source = stage / name
                 _write(
@@ -923,7 +968,7 @@ class _Init:
             _validate(output, pin=pinned)
         except ConfigError as exc:
             raise InitError(f"config error: {exc}", EXIT_CONFIG) from None
-        return replaced
+        return replaced, seeds
 
     def show(self, answers: _Answers, text: str, names: list[str]) -> None:
         what = {
@@ -944,13 +989,18 @@ class _Init:
         answers: _Answers,
         plan: Plan,
         names: list[str],
-        replaced: list[str],
+        replaced_and_seeds: tuple[list[str], list[str]],
         pinned: bool,
     ) -> None:
         output = answers.output
+        replaced, seeds = replaced_and_seeds
         print(f"wrote {output}: {', '.join(names)}", file=self.out)
         if replaced:
             print(f"replaced: {', '.join(replaced)}", file=self.out)
+        if seeds:
+            print(
+                f"replaced install.sh's placeholders: {', '.join(seeds)}", file=self.out
+            )
         if COMMUNITY_FILE in replaced:
             print(
                 "warning: snmp_community is new: LibreNMS devices onboarded before "
