@@ -62,6 +62,8 @@ jobs:
           uv pip install --python .venv-docs/bin/python --require-hashes -r docs/requirements.txt
       - name: Build the site and fail on any warning
         if: steps.docs.outputs.found == 'true'
+        env:
+          NO_MKDOCS_2_WARNING: '1' # hides the Material end-of-life banner, which is not an error
         run: .venv-docs/bin/mkdocs build --strict --site-dir site
       - name: Package the site
         if: steps.docs.outputs.found == 'true' && github.event_name != 'pull_request'
