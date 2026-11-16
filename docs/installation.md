@@ -38,7 +38,19 @@ your router type.
 ## Download and verify the release
 
 Download the bundle and its checksum file from the
-[releases page](https://github.com/islanderman/aimesh-snmp-proxy/releases). Use a scratch folder.
+[releases page](https://github.com/islanderman/aimesh-snmp-proxy/releases).
+
+A release holds five files. You need the bundle and `SHA256SUMS`.
+
+| File                                       | Use                                                    |
+| ------------------------------------------ | ------------------------------------------------------ |
+| `aimesh-snmp-proxy-X.Y.Z.tar.gz`           | The offline bundle that `deploy/install.sh` installs   |
+| `aimesh-snmp-proxy-X.Y.Z.tar.gz.sha256`    | The checksum of the bundle                             |
+| `aimesh_snmp_proxy-X.Y.Z-py3-none-any.whl` | The Python wheel                                       |
+| `aimesh_snmp_proxy-X.Y.Z.tar.gz`           | The source distribution                                |
+| `SHA256SUMS`                               | The checksums of the wheel, the source, and the bundle |
+
+Use a scratch folder for the download.
 
 ```sh
 VERSION=0.3.0
