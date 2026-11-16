@@ -18,7 +18,10 @@ First public release. It continues the private 0.2.x line.
   bridge modes work without AiMesh nodes.
 - `per_node` collector mode. It adds uptime, temperatures, CPU cores, RAM, and exact traffic
   counters for each node, with node certificate pins (`--pin-node-ca` and `[[override]] ca_file`).
-- Commands `check-config`, `discover`, `selftest`, `onboard`, and `dump-snmprec`.
+- Commands `check-config`, `discover`, `selftest`, `onboard`, `dump-snmprec`, and `init`.
+- `init` and `scripts/generate-config.sh` write a validated `config.toml` and secret files for any
+  ASUS router type. `--detect` pins the router certificate and tells an AiMesh root from a
+  standalone device with one login.
 - `onboard` adds the devices to LibreNMS through its API. It runs as a dry run by default and
   deletes only the devices it created.
 - `deploy/install.sh` for systemd hosts. It installs hash-pinned binary wheels, runs the service as a
@@ -32,3 +35,5 @@ First public release. It continues the private 0.2.x line.
   login budget of 6 logins per hour for each device.
 - Secrets live in root-only files and reach the service as systemd credentials. A log filter masks
   secrets and the device half of MAC addresses.
+- Each release ships the offline bundle, a wheel, an sdist, and `SHA256SUMS`. Every file carries a
+  build attestation that `gh attestation verify` checks.
