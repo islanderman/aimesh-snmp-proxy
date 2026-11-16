@@ -127,10 +127,10 @@ sudo $APP -c /etc/aimesh-snmp-proxy/config.toml discover
 ```
 
 ```text
-role    sys_name        port   model     firmware           ip             mac_tail  online  level  backhaul
-router  aimesh-root     16101  RT-AX88U  3.0.0.4.388_00000  192.168.50.1   00:53:01  yes     0      -
-node    aimesh-005311   16102  RT-AX86U  3.0.0.4.388_00000  192.168.50.11  00:53:11  yes     1      wireless 5g1 -58 dBm 866 Mbit/s via 00:53:01
-node    aimesh-example  16103  RT-AX86U  3.0.0.4.388_00000  192.168.50.12  00:53:12  yes     1      wired 1000 Mbit/s via 00:53:01
+role    sys_name       port   model     firmware           ip             mac_tail  online  level  backhaul
+router  aimesh-root    16101  RT-AX88U  3.0.0.4.388_00000  192.168.50.1   00:53:01  yes     0      -
+node    aimesh-005311  16102  RT-AX86U  3.0.0.4.388_00000  192.168.50.11  00:53:11  yes     1      wireless 5g1 -58 dBm 866 Mbit/s via 00:53:01
+node    aimesh-node-b  16103  RT-AX86U  3.0.0.4.388_00000  192.168.50.12  00:53:12  yes     1      wired 1000 Mbit/s via 00:53:01
 ```
 
 | Column     | Meaning                                                                                     |
@@ -239,10 +239,10 @@ clash with the session of the service.
 ```text
 selftest: one read-only poll of 192.168.50.1; test engines on 127.0.0.1 outside the service ports; nothing is written
 
-NODE            MODEL     ONLINE  STATE    OIDS
-aimesh-root     RT-AX88U  yes     serving   150
-aimesh-005311   RT-AX86U  yes     serving   120
-aimesh-example  RT-AX86U  no      silent      -
+NODE           MODEL     ONLINE  STATE    OIDS
+aimesh-root    RT-AX88U  yes     serving   150
+aimesh-005311  RT-AX86U  yes     serving   120
+aimesh-node-b  RT-AX86U  no      silent      -
 
 aimesh-root: sysObjectID .1.3.6.1.4.1.8072.3.2.10; sysDescr ASUS RT-AX88U stock 3.0.0.4.388_00000 via aimesh-snmp-proxy
   wireless created: clients wl0 wl1 wlan; frequency wl0 wl1; rate wl0
@@ -250,7 +250,7 @@ aimesh-root: sysObjectID .1.3.6.1.4.1.8072.3.2.10; sysDescr ASUS RT-AX88U stock 
 aimesh-005311: sysObjectID .1.3.6.1.4.1.8072.3.2.10; sysDescr ASUS RT-AX86U stock 3.0.0.4.388_00000 via aimesh-snmp-proxy
   wireless created: clients wl0 wl1 wlan; frequency wl0 wl1; rate wl0
   wireless omitted: rate wl1 (no clients); snr, noise-floor (never served)
-aimesh-example: silent: no snapshot
+aimesh-node-b: silent: no snapshot
 FAIL: 2 of 3 nodes serve
 ```
 
@@ -389,10 +389,10 @@ Planned API calls, in port order; a node that exists stops at its GET:
   POST /api/v0/devices {"community": "***", "display_template": "AiMesh root aimesh-root", "hostname": "aimesh-root", "os": "asuswrt-merlin", "overwrite_ip": "127.0.0.1", "port": 16101, "snmpver": "v2c", "transport": "udp"}
   (the same GET and POST for each node)
 
-PORT   ROLE  HOSTNAME        PLAN
-16101  root  aimesh-root     add (checked)
-16102  node  aimesh-005311   add (checked)
-16103  node  aimesh-example  add (checked)
+PORT   ROLE  HOSTNAME       PLAN
+16101  root  aimesh-root    add (checked)
+16102  node  aimesh-005311  add (checked)
+16103  node  aimesh-node-b  add (checked)
 
 Run again with --apply to send these calls.
 ```
@@ -485,63 +485,78 @@ aimesh-snmp-proxy init [--host IP] [--port PORT] [--username USER] [--password-s
 ```
 
 Writes `config.toml` and its secret files for one router. It reads no config, so `-c` is a usage
-error: use `--output-dir`. The same program runs from a source checkout as
-`scripts/generate-config.sh`, which takes the same flags.
+error: use `--output-dir`.
 
 Flags answer every question. On a terminal, `init` without `--host` asks for each value that no
-flag gave, and an empty answer takes the default. Without a terminal, `--host` and
-`--password-stdin` are required.
+flag gave. Without a terminal, `--host` and `--password-stdin` are required.
 
-| Option               | Default                                           | Meaning                                                                                                                    |
-| -------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `--host IP`          | asked; `192.168.50.1` on a terminal               | The router LAN IPv4 address                                                                                                |
-| `--port PORT`        | `8443`                                            | The HTTPS port of the router web UI                                                                                        |
-| `--username USER`    | `admin`                                           | The router admin user                                                                                                      |
-| `--password-stdin`   | asked without echo, on a terminal                 | Reads the router password from the first line of standard input. Refuses a terminal                                        |
-| `--instance NAME`    | none: the main service                            | One more router. Writes to `/etc/aimesh-snmp-proxy/NAME` and gives it its own state folder                                 |
-| `--port-base PORT`   | the first free block of 100 ports                 | The `snmp.port_base` of the service: 16101, 16201, and so on                                                               |
-| `--mode MODE`        | `auto`                                            | `auto`, `aimesh` (an AiMesh root), or `standalone` (a router, access point, or media bridge)                               |
-| `--nodes IPS`        | none                                              | The AiMesh node IPs for `nodes.expected`, comma-separated. Ranges such as `192.168.50.11-14` work. Implies `--mode aimesh` |
-| `--sys-name NAME`    | `aimesh-root`, or `aimesh-NAME` with `--instance` | The sysName that LibreNMS shows for the router                                                                             |
-| `--librenms-url URL` | none                                              | Adds an `[onboard]` table with this URL for `onboard`                                                                      |
-| `--librenms-ca PATH` | none                                              | Copies this LibreNMS certificate to `librenms.pem` and pins it in `[onboard]`. Needs `--librenms-url`                      |
-| `--output-dir DIR`   | `/etc/aimesh-snmp-proxy`, or `.../NAME`           | Where to write                                                                                                             |
-| `--detect`           | off                                               | Pins the router certificate, then logs in once to tell an AiMesh root from a standalone device                             |
-| `--yes`              | off                                               | With `--detect`: pins the certificate without asking                                                                       |
-| `--dry-run`          | off                                               | Checks the answers and prints the result. Writes nothing                                                                   |
-| `--force`            | off                                               | Replaces files that exist                                                                                                  |
+| Option               | Default                                                             | Meaning                                                                                                           |
+| -------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `--host IP`          | none; a terminal suggests `192.168.50.1`                            | The router LAN IPv4 address                                                                                       |
+| `--port PORT`        | `8443`                                                              | The HTTPS port of the router web UI                                                                               |
+| `--username USER`    | `admin`                                                             | The router admin user                                                                                             |
+| `--password-stdin`   | off; a terminal asks without echo                                   | Reads the router password from the first line of standard input. Refuses a terminal                               |
+| `--instance NAME`    | none: the main service                                              | One more router: unit `aimesh-snmp-proxy@NAME`, folder `/etc/aimesh-snmp-proxy/NAME`, and its own block of ports  |
+| `--port-base PORT`   | the first of 16101, 16201, ... whose 100 ports no other config uses | The root SNMP port, `snmp.port_base`                                                                              |
+| `--mode MODE`        | `auto`; `aimesh` when `--nodes` is not empty                        | `auto`, `aimesh` (an AiMesh root), or `standalone` (a router, access point, or media bridge without AiMesh nodes) |
+| `--nodes IPS`        | none                                                                | The AiMesh node IPs for `nodes.expected`, comma-separated. Ranges such as `192.168.50.11-14` work                 |
+| `--sys-name NAME`    | `aimesh-root`; with `--instance`, `aimesh-NAME`                     | The sysName that LibreNMS shows. Any name but `aimesh-root` goes into an `[[override]]` on `asus.host`            |
+| `--librenms-url URL` | none: no `[onboard]` table                                          | Adds an `[onboard]` table with this URL                                                                           |
+| `--librenms-ca PATH` | none                                                                | Copies this LibreNMS certificate to `librenms.pem` and names it in `[onboard]`. Needs `--librenms-url`            |
+| `--output-dir DIR`   | `/etc/aimesh-snmp-proxy`, or `/etc/aimesh-snmp-proxy/NAME`          | Where to write. A missing folder gets mode `0700`                                                                 |
+| `--detect`           | off                                                                 | Pins the router certificate, then logs in once to tell an AiMesh root from a standalone device                    |
+| `--yes`              | off                                                                 | With `--detect`: pins the certificate without asking                                                              |
+| `--dry-run`          | off                                                                 | Checks the answers and prints the result. Writes nothing                                                          |
+| `--force`            | off                                                                 | Replaces files that exist                                                                                         |
 
-What it writes:
+These flag combinations are usage errors: `--yes` without `--detect`, `--detect` with `--nodes`,
+`--mode standalone` with `--nodes`, and `--librenms-ca` without `--librenms-url`.
 
-| File             | Mode   | Content                                                                  |
-| ---------------- | ------ | ------------------------------------------------------------------------ |
-| `config.toml`    | `0600` | The config, with the answers. See [Configuration keys](configuration.md) |
-| `asus_password`  | `0600` | The router password, from the prompt or from standard input              |
-| `snmp_community` | `0600` | A new random community of 32 hex digits                                  |
-| `librenms.pem`   | `0644` | A copy of the `--librenms-ca` file. Only with that option                |
+### What `init` writes
 
-- The password never comes from the command line. Pipe it in from a file that only you can read:
-  `sudo $APP init --host 192.168.50.1 --password-stdin < router-password.txt`.
-- `init` writes with umask `077`. It creates a missing folder with mode `0700`. It checks the new
-  config with the loader of `check-config` before it writes anything, and it replaces no file
-  without `--force`.
-- The installer seeds `config.toml` and empty secret files in the main folder. After it, run `init`
-  with `--force`, or run `init` first. A forced run makes a new SNMP community, so LibreNMS devices
-  that you added before need the new one.
-- With `--instance`, `init` sets `state_dir` to `/var/lib/aimesh-snmp-proxy-NAME`, and picks a
-  `port_base` that no other config in `/etc/aimesh-snmp-proxy` uses. A `--port-base` within 100
-  ports of another service is an error. The default sysName is `aimesh-NAME`, set by an
-  `[[override]]` that matches the router address.
-- `--mode auto` leaves `[nodes]` as a comment. `--mode aimesh` writes `[nodes] expected` from
-  `--nodes`. `--mode standalone` writes no `[nodes]`.
-- `--detect` logs in once. Stop the service first: the router takes one admin session. The proxy
-  keeps to 6 router logins in one hour, and `--detect`, `discover`, and `selftest` each spend one. It
-  asks you to confirm the certificate fingerprint, as `discover --pin-cert` does. On an AiMesh
-  root it fills `nodes.expected` with the node IPs in address order, and on any other device it
-  writes no `[nodes]`.
-- `--detect` with `--dry-run` still logs in once, but writes nothing.
+| File              | Mode   | Content                                                      |
+| ----------------- | ------ | ------------------------------------------------------------ |
+| `asus_password`   | `0600` | The router password, from the prompt or from standard input  |
+| `snmp_community`  | `0600` | A new random community of 32 hex digits                      |
+| `librenms.pem`    | `0644` | A copy of the `--librenms-ca` file. Only with that option    |
+| `asus_router.pem` | `0644` | The router certificate. Only with `--detect`                 |
+| `config.toml`     | `0600` | The config. See [Configuration keys](configuration.md). Last |
+
+- The password never comes from the command line. Pipe it in from a file that only you can read, as
+  in the examples below.
+- `init` writes with umask `077`. Each file is written in one step, and `config.toml` goes last,
+  because it names the others.
+- It checks the new config with the loader of `check-config` before it writes anything.
+- It replaces no file without `--force`. A forced run prints `replaced: ...`, and it makes a new SNMP
+  community, so LibreNMS devices that you added before need the new one.
+- The installer seeds `config.toml` and empty secret files. Run `init` before the installer, with
+  `scripts/generate-config.sh` from a source checkout, or run `init --force` after it.
 - `--librenms-url` does not create `librenms_token`. Put the API token there before you run
   `onboard`.
+- With `--instance`, `init` sets `state_dir` to `/var/lib/aimesh-snmp-proxy-NAME`. It reads the main
+  config and the config of each instance in `/etc/aimesh-snmp-proxy`, and picks a `port_base` that
+  none of them overlaps. A `--port-base` within 100 ports of another service is an error.
+- `--mode auto` leaves `[nodes]` as a comment. `--mode aimesh` writes `[nodes] expected` from
+  `--nodes`, or an empty list. `--mode standalone` writes no `[nodes]`.
+
+### Detect the router type
+
+`--detect` finds out what the router is, so that you do not list the nodes by hand.
+
+- It pins the router certificate as `discover --pin-cert` does: a TLS handshake only, then the
+  SHA-256 fingerprint, then the question `Type yes to pin this certificate`. `--yes` answers it.
+  There is no question when the same certificate is already pinned.
+- Then it logs in once and logs out. It only reads: the AiMesh list, or for a router without one,
+  the Wi-Fi data of the device.
+- On an AiMesh root it fills `nodes.expected` with the node IPs in address order. It leaves out a
+  node that has no IP, with a warning. With no nodes it treats the router as a standalone device
+  and writes no `[nodes]`.
+- An explicit `--mode` wins. `init` warns when the router disagrees.
+- Stop the service that polls the router first: the router takes one admin session. The proxy keeps
+  to 6 router logins in one hour, and `--detect`, `discover`, and `selftest` each spend one.
+- It keeps the login state in a temporary folder, so the `lockout.json` of the service stays as it
+  is. A refused login exits with 1 and writes no config.
+- With `--dry-run` it still logs in once, but writes nothing.
 
 After the pin steps, `--detect` prints what it found:
 
@@ -554,19 +569,35 @@ detected: an AiMesh root with 2 nodes
 
 For any other device it prints `detected: a standalone router, AP or media bridge`.
 
-A dry run prints the files and the config:
+### Questions on a terminal
 
-```text
-dry run: nothing written. /etc/aimesh-snmp-proxy would get:
-  asus_password (0600): the router password
-  snmp_community (0600): a new random SNMP community
-  config.toml (0600):
-# Written by aimesh-snmp-proxy init 0.3.0; check it: check-config.
-...
-config ok: check-config's loader accepts it
+Each question shows its default in brackets, and Enter takes it. A flag that gave the answer skips
+its question. A wrong answer is asked again, up to three times. Then `init` stops with exit code 2.
+The questions come in this order:
+
+1. The instance name. Empty means the main service.
+2. The router IPv4 address.
+3. The HTTPS port.
+4. The admin user.
+5. The router type. A `--mode` or a `--nodes` skips it.
+6. Whether to log in once now to detect the type and the nodes. It is asked for `auto` and `aimesh`,
+   without `--detect` and without `--nodes`.
+7. The AiMesh node IPs. It is asked for `aimesh` without detection.
+8. The sysName.
+9. The SNMP port base.
+10. The LibreNMS URL. Empty means no `[onboard]` table.
+11. The LibreNMS certificate to pin. It is asked after a URL.
+12. The router password, without echo.
+
+With `--detect`, the question `Type yes to pin this certificate` comes last.
+
+### Run `init`
+
+The main service, with the password in a file that only you can read:
+
+```sh
+sudo $APP init --host 192.168.50.1 --password-stdin < router-password.txt
 ```
-
-A real run prints what it wrote and the next steps:
 
 ```text
 wrote /etc/aimesh-snmp-proxy: asus_password, snmp_community, config.toml
@@ -582,35 +613,95 @@ Next steps (APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy):
   7. add [onboard] (or re-run init with --librenms-url), then sudo $APP -c /etc/aimesh-snmp-proxy/config.toml onboard --apply
 ```
 
-With `--output-dir`, the first step is to move the files to the folder that the installer reads.
+With `--output-dir`, a first step says to move the files to the folder that the installer reads.
 
-On a terminal, the questions come in this order. A flag that gave the answer skips its question.
+A standalone access point as the instance `lab`, beside the main service:
 
-1. Instance name
-2. Router IPv4 address
-3. HTTPS port
-4. Admin user
-5. Router type
-6. Whether to detect the type and the nodes
-7. Node IPs
-8. The sysName
-9. The port base
-10. The LibreNMS URL
-11. The LibreNMS certificate to pin
-12. The router password
+```sh
+sudo $APP init --host 192.168.50.2 --instance lab --mode standalone --password-stdin < router-password.txt
+```
 
-A wrong answer is asked again. Three wrong answers stop `init`.
+The command writes `/etc/aimesh-snmp-proxy/lab/config.toml`. The next steps then name
+`install.sh --instance lab`, `-c /etc/aimesh-snmp-proxy/lab/config.toml`, and the unit
+`aimesh-snmp-proxy@lab`. The config is:
 
-Exit codes:
+```toml
+# Written by aimesh-snmp-proxy init 0.3.0; check it: check-config.
+# Relative *_file paths resolve against $CREDENTIALS_DIRECTORY (systemd
+# LoadCredential=), else this file's folder. Secret files must be chmod 600.
 
-- `0` on success, and for a dry run.
-- `1` when a file exists and you gave no `--force`, or a folder or file cannot be written.
-- `1` when `--detect` cannot pin or read the router, or the `--librenms-ca` file cannot be read.
-- `2` on a usage error: an unknown or inconsistent flag, a missing `--host` without a terminal, or a
-  bad password.
-- `2` when an answer is unusable, or the input ends at a question.
-- `78` when the new config fails the loader, or the `--librenms-ca` file is no certificate.
-- `78` when a `--port-base` overlaps another service.
+# Must survive restarts: ports.json (port pins), counters.json, lockout.json.
+state_dir = "/var/lib/aimesh-snmp-proxy-lab"
+
+[asus]
+host = "192.168.50.2"
+port = 8443
+use_ssl = true  # must stay true: HTTP sends the login in cleartext
+username = "admin"
+password_file = "asus_password"
+ca_file = "asus_router.pem"  # the router certificate: discover --pin-cert
+
+# A standalone router, AP or media bridge is one device: no [nodes].
+
+[snmp]
+bind = "127.0.0.1"  # the only accepted value
+port_base = 16201  # root port; node N serves port_base + N
+profile = "asuswrt-merlin"
+community_file = "snmp_community"
+
+[collector]
+mode = "root_only"  # per_node adds one router login per node
+
+[logging]
+level = "INFO"
+
+# The sysName LibreNMS shows for this router.
+[[override]]
+match = "192.168.50.2"
+sys_name = "aimesh-lab"
+```
+
+A dry run prints the files and the config, and writes nothing:
+
+```text
+dry run: nothing written. /etc/aimesh-snmp-proxy would get:
+  asus_password (0600): the router password
+  snmp_community (0600): a new random SNMP community
+  config.toml (0600):
+# Written by aimesh-snmp-proxy init 0.3.0; check it: check-config.
+...
+config ok: check-config's loader accepts it
+```
+
+When a file exists, `init` stops and names the files:
+
+```text
+init: /etc/aimesh-snmp-proxy/lab already holds config.toml, asus_password, snmp_community: pass --force to replace (install.sh seeds config.toml and empty secret files)
+```
+
+### The wrapper script
+
+`scripts/generate-config.sh` passes every argument to `aimesh-snmp-proxy init`. It looks for the
+program in this order:
+
+1. `$AIMESH_SNMP_PROXY`
+2. `/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy`
+3. `aimesh-snmp-proxy` on `PATH`
+4. `uv run --frozen --project CHECKOUT aimesh-snmp-proxy init`, where `CHECKOUT` is the source
+   checkout that holds the script
+
+It exits with 127 when it finds none. Otherwise it exits with the code of `init`.
+
+### Exit codes of `init`
+
+- `0` when the files are written, or the dry run passes.
+- `1` when `init` refuses or fails: a file exists and you gave no `--force`, a file or folder cannot be
+  read or written, you declined the pin, the router is unreachable or refuses the login, or a
+  config of another service cannot be read and you gave no `--port-base`.
+- `2` on a usage error: a bad or conflicting flag, no `--host` or no password source without a
+  terminal, a bad password, no valid answer, or input that ends at a question.
+- `78` on a config error: the loader refuses the result (for example, a node IP listed twice),
+  `--port-base` overlaps another service, or the `--librenms-ca` file is no PEM certificate.
 
 ## Environment variables
 
