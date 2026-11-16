@@ -239,6 +239,15 @@ def test_no_secret_value_appears_in_the_docs(page):
     assert not SECRET_ASSIGNMENT.search(read(page)), names(page)
 
 
+HTTP_URL = re.compile(r"http://[A-Za-z0-9][^\s`\"'<>)\]]*")
+
+
+@pytest.mark.parametrize("page", PAGES, ids=names)
+def test_cleartext_urls_name_the_loopback_address_only(page):
+    for url in HTTP_URL.findall(read(page)):
+        assert url.startswith("http://127.0.0.1"), f"{names(page)}: {url}"
+
+
 def test_no_unprivileged_cd_into_the_root_only_config_dir():
     # /etc/aimesh-snmp-proxy is 0700 root: a plain cd there fails.
     for page in PAGES:
