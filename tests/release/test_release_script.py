@@ -20,7 +20,8 @@ pytestmark = pytest.mark.skipif(
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "release.sh"
 GIT = shutil.which("git") or "git"
 BASH = shutil.which("bash") or "bash"
-EMAIL = "jerry@chenyang.us"
+NAME = "Release Test"
+EMAIL = "release-test@example.com"
 SLUG = "github.com/islanderman/aimesh-snmp-proxy"
 ORIGIN_URL = "git@github.com:islanderman/aimesh-snmp-proxy.git"
 
@@ -199,7 +200,7 @@ def sandbox(tmp_path: Path) -> Sandbox:
         [GIT, "init", "-q", "--bare", "-b", "main", str(origin)], check=True, env=env
     )
     box.git("init", "-q", "-b", "main")
-    box.git("config", "user.name", "Jerry Yang")
+    box.git("config", "user.name", NAME)
     box.git("config", "user.email", EMAIL)
     box.git("remote", "add", "origin", ORIGIN_URL)
     box.git("config", f"url.{origin}.insteadOf", ORIGIN_URL)
@@ -295,7 +296,7 @@ def test_prepare_commits_one_commit_as_the_maintainer_on_a_release_branch(
     assert sandbox.git("branch", "--show-current") == "release/v0.3.0"
     assert sandbox.git("rev-list", "--count", "origin/main..HEAD") == "1"
     fields = sandbox.git("log", "-1", "--format=%an|%ae|%cn|%ce|%s")
-    assert fields == f"Jerry Yang|{EMAIL}|Jerry Yang|{EMAIL}|chore(release): v0.3.0"
+    assert fields == f"{NAME}|{EMAIL}|{NAME}|{EMAIL}|chore(release): v0.3.0"
     changed = sandbox.git("show", "--name-only", "--format=", "HEAD").split()
     assert sorted(changed) == ["CHANGELOG.md", "pyproject.toml", "uv.lock"]
 
@@ -684,7 +685,7 @@ def tagged(sandbox: Sandbox, tmp_path: Path) -> Path:
     sandbox.git("checkout", "-q", "v0.3.0", cwd=clone)
     # A runner has no identity to guess from, so the tests that tag or commit need one.
     sandbox.git("config", "user.email", EMAIL, cwd=clone)
-    sandbox.git("config", "user.name", "Jerry Yang", cwd=clone)
+    sandbox.git("config", "user.name", NAME, cwd=clone)
     return clone
 
 
@@ -804,7 +805,7 @@ def test_dry_run_prepare_changes_nothing_and_shows_the_plan(
     assert "release/v0.3.0 from origin/main" in done.stdout
     assert "0.2.4 -> 0.3.0" in done.stdout
     assert "## [0.3.0] - 2026-11-20" in done.stdout
-    assert f"as Jerry Yang <{EMAIL}>" in done.stdout
+    assert f"as {NAME} <{EMAIL}>" in done.stdout
     assert "- First public release." in done.stdout
 
 
