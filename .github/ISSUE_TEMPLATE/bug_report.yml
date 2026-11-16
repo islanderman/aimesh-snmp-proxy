@@ -41,7 +41,7 @@ body:
     attributes:
       label: How did you install it?
       options:
-        - Offline bundle with deploy/install.sh
+        - Install bundle with deploy/install.sh
         - From source with uv
         - Other
     validations:
