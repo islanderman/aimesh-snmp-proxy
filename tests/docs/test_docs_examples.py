@@ -16,6 +16,7 @@ from pathlib import Path
 import pytest
 
 from aimesh_snmp_proxy import __main__ as cli
+from aimesh_snmp_proxy import config as config_module
 from aimesh_snmp_proxy.config import load_config
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -47,8 +48,17 @@ def read(path: Path) -> str:
     return path.read_text()
 
 
+FENCE = re.compile(r"^```([^\n]*)\n(.*?)^```", re.DOTALL | re.MULTILINE)
+FENCE_LABELS = {"sh", "bash", "text", "toml", "json", "ini"}
+
+
 def shell_blocks(text: str) -> list[str]:
     return re.findall(r"```(?:sh|bash)\n(.*?)```", text, re.DOTALL)
+
+
+def logical_lines(block: str) -> list[str]:
+    """The lines of a shell block, each trailing backslash joined to the next."""
+    return re.sub(r"\\\n\s*", " ", block).splitlines()
 
 
 def app_commands(text: str) -> list[list[str]]:
@@ -111,7 +121,7 @@ def test_every_command_exists_and_accepts_its_flags(page):
 
 def test_the_docs_show_the_core_commands():
     shown = {words[0] for page in PAGES for words in app_commands(read(page))}
-    assert {"discover", "check-config", "selftest", "onboard"} <= shown
+    assert {"init", "discover", "check-config", "selftest", "onboard"} <= shown
 
 
 @pytest.fixture(scope="module")
@@ -124,14 +134,14 @@ def installer_help() -> str:
 @pytest.mark.parametrize("page", PAGES, ids=names)
 def test_every_installer_option_exists(page, installer_help):
     for block in shell_blocks(read(page)):
-        for line in block.splitlines():
+        for line in logical_lines(block):
             if "install.sh" not in line:
                 continue
             for flag in re.findall(r"(?<![\w-])--[a-z][a-z-]*", line):
                 assert flag in installer_help, f"{names(page)}: {flag}"
 
 
-def test_the_installer_options_are_documented():
+def test_the_installer_options_are_documented(installer_help):
     text = read(DOCS_DIR / "installation.md")
     for flag in (
         "--dry-run",
@@ -143,6 +153,7 @@ def test_the_installer_options_are_documented():
         "--yes",
     ):
         assert f"`{flag}" in text, flag
+        assert flag in installer_help, flag
 
 
 def reference_pages() -> list[Path]:
@@ -171,6 +182,18 @@ def code_spans(text: str) -> set[str]:
 
 def test_one_configuration_reference_exists():
     assert len(reference_pages()) == 1
+
+
+def test_the_reference_names_every_state_file():
+    package = ROOT / "src" / "aimesh_snmp_proxy"
+    source = "".join(
+        read(package / name) for name in ("config.py", "ports.py", "ops/ledger.py")
+    )
+    state_files = set(re.findall(r'"([a-z_]+\.json)"', source))
+    documented = read(reference_pages()[0])
+    missing = sorted(name for name in state_files if name not in documented)
+    assert state_files, "no state file name found in the source"
+    assert not missing, f"undocumented state files: {missing}"
 
 
 def test_the_reference_names_every_config_key():
@@ -256,16 +279,31 @@ def test_no_unprivileged_cd_into_the_root_only_config_dir():
         assert "cd /etc/aimesh-snmp-proxy" not in read(page), names(page)
 
 
-def test_icmp_is_off_before_onboard_and_on_after():
-    text = read(DOCS_DIR / "librenms.md")
-    lnms = "sudo -u librenms /opt/librenms/lnms config:set icmp_check"
-    off = text.index(f"{lnms} false")
-    dry_run = text.index("sudo $APP onboard\n")
-    apply = text.index("sudo $APP onboard --apply\n")
-    assert off < dry_run < apply < text.index(f"{lnms} true")
+LNMS = "sudo -u librenms /opt/librenms/lnms config:set icmp_check"
+ONBOARD_PAGES = [page for page in PAGES if "sudo $APP onboard --apply\n" in read(page)]
+
+
+def test_the_pages_that_apply_onboard_are_found():
+    found = {names(page) for page in ONBOARD_PAGES}
+    assert {"README.md", "docs/librenms.md"} <= found
+
+
+@pytest.mark.parametrize("page", ONBOARD_PAGES, ids=names)
+def test_icmp_is_off_before_onboard_and_on_after(page):
+    text = read(page)
+    steps = {
+        "ICMP off": f"{LNMS} false",
+        "dry run": "sudo $APP onboard\n",
+        "apply": "sudo $APP onboard --apply\n",
+        "ICMP on": f"{LNMS} true",
+    }
+    at = {step: text.find(line) for step, line in steps.items()}
+    assert min(at.values()) >= 0, f"{names(page)} lacks a step: {at}"
+    assert list(at.values()) == sorted(at.values()), f"{names(page)}: {at}"
 
 
 def test_onboard_http_is_only_a_documented_fallback():
+    assert "--allow-http" in read(DOCS_DIR / "librenms.md")  # explained in prose
     for page in PAGES:
         for block in shell_blocks(read(page)):
             assert "--allow-http" not in block, names(page)
@@ -303,7 +341,96 @@ def test_the_documented_router_port_is_the_example_port():
     assert "8443" in read(DOCS_DIR / "installation.md")
 
 
+SUDOEDIT = re.compile(r"sudoedit|sudo\s+(?:-\w*e\w*|--edit)\b")
+
+
 @pytest.mark.parametrize("page", PAGES, ids=names)
 def test_the_docs_avoid_sudoedit(page):
-    # sudo-rs may lack it: the docs use `systemctl edit` for drop-ins.
-    assert "sudoedit" not in read(page), names(page)
+    # sudo-rs may lack it, and `sudo -e` is the same thing: use `systemctl edit`.
+    assert not SUDOEDIT.search(read(page)), names(page)
+
+
+@pytest.mark.parametrize("page", PAGES, ids=names)
+def test_every_code_block_has_a_known_label(page):
+    # The shell checks read sh and bash blocks only: a new label must be added above.
+    labels = {match.group(1).strip() for match in FENCE.finditer(read(page))}
+    assert labels <= FENCE_LABELS, f"{names(page)}: {sorted(labels - FENCE_LABELS)}"
+
+
+@pytest.mark.parametrize("page", PAGES, ids=names)
+def test_every_toml_block_parses(page):
+    for match in FENCE.finditer(read(page)):
+        if match.group(1).strip() == "toml":
+            try:
+                tomllib.loads(match.group(2))
+            except tomllib.TOMLDecodeError as error:
+                pytest.fail(f"{names(page)}: {error}\n{match.group(2)}")
+
+
+@pytest.mark.parametrize("page", PAGES, ids=names)
+def test_app_is_defined_before_a_block_uses_it(page):
+    defined = False
+    for block in shell_blocks(read(page)):
+        for line in block.splitlines():
+            if line.startswith("APP="):
+                defined = True
+            elif "$APP" in line and not line.lstrip().startswith("#"):
+                assert defined, f"{names(page)}: $APP before APP=: {line.strip()}"
+
+
+def command_parser(command: str):
+    module_name, attribute, _ = cli.COMMANDS[command]
+    handler = getattr(importlib.import_module(module_name), attribute)
+    return getattr(importlib.import_module(handler.__module__), "_parser", None)
+
+
+PARSED_COMMANDS = [name for name in sorted(cli.COMMANDS) if command_parser(name)]
+
+
+@pytest.mark.parametrize("command", PARSED_COMMANDS)
+def test_the_cli_reference_documents_every_flag(command):
+    reference = read(DOCS_DIR / "reference" / "cli.md")
+    section = reference.split(f"\n## `{command}`", 1)[1].split("\n## ", 1)[0]
+    flags = sorted(
+        {
+            option
+            for action in command_parser(command)()._actions
+            for option in action.option_strings
+            if option.startswith("--") and option != "--help"
+        }
+    )
+    missing = [
+        flag
+        for flag in flags
+        if not re.search(rf"^\| `{re.escape(flag)}[ `]", section, re.MULTILINE)
+    ]
+    assert not missing, f"reference/cli.md `{command}` has no table row for: {missing}"
+
+
+def key_paths(table: dict, prefix: str = "") -> set[tuple[str, str]]:
+    """``(table path, key)`` for every key of a parsed TOML file, tables included."""
+    found = set()
+    for key, value in table.items():
+        found.add((prefix, key))
+        items = value if isinstance(value, list) else [value]
+        for item in items:
+            if isinstance(item, dict):
+                found |= key_paths(item, f"{prefix}.{key}".lstrip("."))
+    return found
+
+
+def test_the_complete_example_sets_every_key_in_every_table(tmp_path, monkeypatch):
+    # The name check above passes when a name such as ca_file is set in one table only.
+    read: set[tuple[str, str]] = set()
+    real_get = config_module._Table.get
+
+    def spy(self, name, default=config_module._MISSING):
+        read.add((re.sub(r"\[\d+\]", "", self.path), name))
+        return real_get(self, name, default)
+
+    monkeypatch.setattr(config_module._Table, "get", spy)
+    path = tmp_path / "config.toml"
+    path.write_text(complete_example())
+    load_config(path, env={})
+    missing = sorted(read - key_paths(tomllib.loads(complete_example())))
+    assert not missing, f"the example omits: {missing}"
