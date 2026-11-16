@@ -33,7 +33,7 @@ treats the last three types the same way.
 | Admin user name and password | The login of the router web UI                                                |
 | HTTPS admin login            | _Administration_, _System_, _Authentication Method_: `HTTPS` or `Both`        |
 | HTTPS port                   | The same page. The default is 8443                                            |
-| Node addresses               | AiMesh only. `discover` lists them after you pin the root                     |
+| Node addresses               | AiMesh only. `init --detect` finds them for you                               |
 | LibreNMS address             | The host that runs LibreNMS                                                   |
 
 The guides use these example values. Replace them with your own.
