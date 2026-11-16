@@ -50,7 +50,9 @@ pre-commit run -a
 | `make audit`        | Checks the locked runtime packages, except `asusrouter`, against the PyPI advisory database. Needs network |
 | `make bundle`       | Builds the release bundle into `dist/`. Needs network                                                      |
 
-Fix a failure and run the command again.
+The hooks run `ruff`, `shellcheck`, `actionlint`, `gitleaks`, `markdownlint`, `prettier`, and basic
+file checks. `ruff` also formats the Python code blocks in Markdown files. Some hooks fix files in
+place: stage the fixes and commit again. Fix any other failure and run the command again.
 
 ## Write the test first
 
@@ -62,10 +64,11 @@ Fix a failure and run the command again.
 
 ## Follow the conventions
 
-- **Commits.** Use [Conventional Commits](https://www.conventionalcommits.org/): `type(scope):
-subject`. Keep the message to one or two lines. Name the specific change in the subject.
-  Examples: `fix(mapping): keep a wired row on its total`, `docs(install): add the dry-run step`.
-  Types in use are `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, and `chore`.
+- **Commits.** Use [Conventional Commits](https://www.conventionalcommits.org/). The format is
+  `type(scope): subject`. Keep the message to one or two lines. Name the specific change in the
+  subject. Examples: `fix(mapping): keep a wired row on its total` and
+  `docs(install): add the dry-run step`. Types in use are `feat`, `fix`, `docs`, `test`,
+  `refactor`, `perf`, `build`, `ci`, and `chore`.
 - **Small commits.** Commit after each logical change.
 - **Comments.** A code comment explains why, not what. Keep each comment to three lines or fewer.
 - **Changelog.** Add one bullet under `## [Unreleased]` in `CHANGELOG.md` for a change that a user
@@ -91,6 +94,10 @@ Open <http://127.0.0.1:8000>. Before you push, run `.venv-docs/bin/mkdocs build 
 fails the build, so a broken link or an orphan page never ships. A pull request builds the site. A
 push to `main` builds and publishes it to GitHub Pages.
 
+Material for MkDocs reaches end of life on 2027-05-05. It gets critical fixes and security updates
+until then. The build prints a notice about it. Set `NO_MKDOCS_2_WARNING=1` to hide the notice. Plan
+a move to a maintained theme before that date.
+
 The pages `docs/contributing.md` and `docs/changelog.md` include the files `CONTRIBUTING.md` and
 `CHANGELOG.md`. Edit the root files. Use full `https://` links in them, so they work on GitHub and on
 the site.
@@ -113,8 +120,10 @@ Never commit to `main`.
 ## Release a version
 
 Only a maintainer releases. `scripts/release.sh` needs the GitHub CLI (`gh`), a clean working tree,
-and a git author and committer email that match the maintainer's address. It reads the changelog and
-the version, so keep `## [Unreleased]` in `CHANGELOG.md` current as changes merge.
+and a repository-local `git config user.email`. The release commit and the tag use that address as
+author and committer. The script refuses a global or environment identity. It reads the changelog
+and the version, so keep `## [Unreleased]` in `CHANGELOG.md` current as changes merge. Each form
+below also accepts `--dry-run`.
 
 **1. Rehearse.** This prints the plan and the release notes. It changes nothing.
 
@@ -143,9 +152,20 @@ scripts/release.sh --tag X.Y.Z
 sdist, and the offline bundle, writes `SHA256SUMS`, attests every file, and publishes the GitHub
 release with the notes from `CHANGELOG.md`. No workflow commits or pushes.
 
-Run `scripts/smoke-test.sh` before you tag. It builds the release files, installs the bundle into a
-fresh environment, and runs the CLI against the bundled example config. It needs `uv`, `git`, `tar`,
-and network access.
+Run `scripts/smoke-test.sh` before you tag. It builds the sdist, the wheel, and the offline bundle,
+and checks the bundle checksums. It installs the bundle into a fresh environment and runs
+`--version`, `--help`, and `check-config` on the bundled example config with throwaway secrets. CI
+runs it as the `smoke` job. It needs `uv`, `git`, `tar`, and network access.
+
+### If a release fails
+
+- **A transient failure,** such as the network or a runner: open the Release run of the tag in the
+  Actions tab and choose _Re-run failed jobs_.
+- **A real fault:** never reuse a version. Delete the failed draft release and the tag, fix `main`
+  by pull request, and release the next patch version. `release.sh --tag` tags the old release
+  commit, so a fix on `main` would not reach a re-tagged version.
+- **A rehearsal:** run the Release workflow by hand from `main`, from the Actions tab with _Run
+  workflow_. It builds and uploads the files and publishes nothing.
 
 ## License
 
