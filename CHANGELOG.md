@@ -6,6 +6,8 @@ All notable changes to this project are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-15
+
 First public release. It continues the private 0.2.x line.
 
 ### Added
