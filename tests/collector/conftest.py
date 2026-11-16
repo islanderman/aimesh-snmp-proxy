@@ -239,6 +239,7 @@ def mock_router(tmp_path: Path, router_cert: Any) -> Callable[..., Any]:
         cert_file.write_text(pair.cert_pem)
         key_file.write_text(pair.key_pem)
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
         ctx.load_cert_chain(cert_file, key_file)
         data = load_fixture(fixture) if isinstance(fixture, str) else fixture
         router = MockRouter(data, username="admin", password=CANARIES["asus_password"])

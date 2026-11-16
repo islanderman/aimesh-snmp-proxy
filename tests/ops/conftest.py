@@ -350,6 +350,7 @@ def make_fake(canaries) -> Iterator[Callable[..., FakeLibreNMS]]:
         ctx = None
         if tls_cert is not None:
             ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
             ctx.load_cert_chain(tls_cert.cert_path, tls_cert.key_path)
         fake = FakeLibreNMS(canaries["onboard_token"], ctx)
         started.append(fake)

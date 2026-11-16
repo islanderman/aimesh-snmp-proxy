@@ -370,6 +370,7 @@ async def fetch_chain(
 ) -> list[bytes]:
     """The DER chain a server presents, leaf first; a handshake only, unverified."""
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ctx.minimum_version = ssl.TLSVersion.TLSv1_2  # explicit on every platform
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
     async with asyncio.timeout(timeout_s):
