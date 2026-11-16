@@ -1,0 +1,81 @@
+[project]
+name = "aimesh-snmp-proxy"
+version = "0.3.0.dev0"
+description = "Serve stock-firmware ASUS routers, AiMesh nodes, APs and media bridges over SNMP for LibreNMS"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Jerry Yang", email = "jerry@chenyang.us" }]
+requires-python = ">=3.11"
+keywords = ["asus", "aimesh", "asuswrt", "snmp", "librenms", "monitoring", "router", "media-bridge"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: No Input/Output (Daemon)",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Networking :: Monitoring",
+]
+dependencies = [
+    "aiohttp==3.14.5",
+    "asusrouter @ git+https://github.com/Vaskivskyi/asusrouter@c1e5900c6582afe7eb414e76b2513738721a4093",
+    "cryptography==50.0.2",
+    "pysnmp==7.1.32",
+]
+
+[project.urls]
+Homepage = "https://islanderman.github.io/aimesh-snmp-proxy/"
+Repository = "https://github.com/islanderman/aimesh-snmp-proxy"
+Issues = "https://github.com/islanderman/aimesh-snmp-proxy/issues"
+Changelog = "https://github.com/islanderman/aimesh-snmp-proxy/blob/main/CHANGELOG.md"
+
+[project.scripts]
+aimesh-snmp-proxy = "aimesh_snmp_proxy.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.28,<0.10"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["B", "C4", "E", "F", "I", "N", "PT", "RUF", "S", "SIM", "UP", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S104", "S105", "S106", "S108", "S603"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
+testpaths = ["tests"]
+xfail_strict = true
+
+[tool.coverage.run]
+branch = true
+source = ["aimesh_snmp_proxy"]
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true
+exclude_also = ["if TYPE_CHECKING:", "if __name__ == .__main__.:"]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
