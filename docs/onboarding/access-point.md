@@ -23,11 +23,11 @@ APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
 sudo $APP init --detect
 ```
 
-`init` asks a few questions. Each shows its default in brackets, and Enter takes it. The questions
-are the instance name (leave it empty), the router address, the HTTPS port, the admin user, the
-router type (`auto` is right), the name that LibreNMS shows, the SNMP port base, and the LibreNMS
-address (optional). It asks for the admin password last, and the prompt does not echo. See
-[`init`](../reference/cli.md#init) for every flag.
+`init` asks a few questions. Each shows its default in brackets, and Enter takes it. First it asks
+for the instance name (leave it empty), the router address, the HTTPS port, and the admin user. Then
+it asks for the router type (`auto` is right), the name that LibreNMS shows, the SNMP port base, and
+the LibreNMS address (optional). It asks for the admin password last, and the prompt does not echo.
+See [`init`](../reference/cli.md#init) for every flag.
 
 Answer the name question with a name of your own, for example `hall-ap`. The default
 `aimesh-root` clashes in LibreNMS when you serve a second router.

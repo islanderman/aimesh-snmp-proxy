@@ -75,9 +75,10 @@ node    aimesh-005311  16102  RT-EXAMPLE  3.0.0.x   192.168.50.11  00:53:11  yes
 node    aimesh-005312  16103  RT-EXAMPLE  3.0.0.x   192.168.50.12  00:53:12  yes     1      wired 1000 Mbit/s via 00:53:01
 ```
 
-The columns are the served name, the SNMP port, the model and firmware, the LAN address, the end of
-the MAC address, the online state, the AiMesh level, and the backhaul to the parent. The port is a
-preview. The service pins the real port in `ports.json` at its first start.
+The first columns are the served name, the SNMP port, the model, the firmware, and the LAN address.
+The last columns are the end of the MAC address, the online state, the AiMesh level, and the backhaul
+to the parent. The port is a preview. The service pins the real port in `ports.json` at its first
+start.
 
 A standalone router, access point, or media bridge shows one row, with the role `router`.
 
@@ -97,9 +98,9 @@ A node you do not list takes the next free index later.
 
 ## 5. AiMesh only: serve per-node detail
 
-With the default mode `root_only`, a node shows what the root knows about it: model, radios,
-clients, ports, backhaul, and traffic rates, plus one CPU row and a memory percentage. Its uptime
-counts from the moment the proxy began to serve it. Switch to `per_node` for the real uptime,
+With the default mode `root_only`, a node shows what the root knows about it. That is the model,
+radios, clients, ports, backhaul, and traffic rates, plus one CPU row and a memory percentage. Its
+uptime counts from the moment the proxy began to serve it. Switch to `per_node` for the real uptime,
 temperatures, per-core CPU, RAM, channel frequency, and exact traffic counters of each node. The
 proxy then logs in to every node too. See
 [Collector modes](../reference/configuration.md#collector-modes).
