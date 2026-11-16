@@ -34,18 +34,18 @@ LibreNMS device has its hostname. It finds `aimesh-root` from your first router 
 the second one with `exists (device N); left unchanged`.
 
 `init --instance NAME` names the root `aimesh-NAME`, so each instance differs from the others. If you
-write the config by hand, give each root its own name in one of two ways:
+write the config by hand, give each root its own name in one of two ways.
 
-- Add an `[[override]]` whose `match` is the router address and whose `sys_name` is unique:
+**Add an override.** Its `match` is the router address, and its `sys_name` is unique:
 
-  ```toml
-  [[override]]
-  match = "192.168.50.2"
-  sys_name = "hall-ap"
-  ```
+```toml
+[[override]]
+match = "192.168.50.2"
+sys_name = "hall-ap"
+```
 
-- Set `hostname = "ip"` in `[onboard]`. LibreNMS then names each device by its LAN address. The
-  device still serves its sysName.
+**Or name the devices by address.** Set `hostname = "ip"` in `[onboard]`. LibreNMS then names each
+device by its LAN address. The device still serves its sysName.
 
 Nodes get `aimesh-` plus the last six hex digits of their MAC address, so they differ already.
 
@@ -64,64 +64,63 @@ Leave 100 ports between bases. A service with more than 99 nodes needs a wider g
 
 ## Add an instance
 
-1. Stop every running service, including the one for your first router. The installer refuses to
-   run while any service runs, even with `--dry-run`. All services share one environment.
-   Then install the instance. This seeds `/etc/aimesh-snmp-proxy/ap1/config.toml` from the example
-   and points its `state_dir` at the instance folder. Use `--dry-run` first.
+**1. Stop the services and install the instance.** Stop every running service, including the one for
+your first router. The installer refuses to run while any service runs, even with `--dry-run`. All
+services share one environment. Then install the instance. This seeds
+`/etc/aimesh-snmp-proxy/ap1/config.toml` from the example and points its `state_dir` at the instance
+folder. Use `--dry-run` first.
 
-   ```sh
-   cd /usr/local/src/aimesh-snmp-proxy-VERSION
-   sudo ./deploy/install.sh --instance ap1 --dry-run
-   sudo ./deploy/install.sh --instance ap1
-   ```
+```sh
+cd /usr/local/src/aimesh-snmp-proxy-VERSION
+sudo ./deploy/install.sh --instance ap1 --dry-run
+sudo ./deploy/install.sh --instance ap1
+```
 
-2. Generate the config for the instance. `init` reads the configs of your other services and picks
-   a free block of ports for `snmp.port_base`. It sets `state_dir` to the instance folder, names the
-   root `aimesh-ap1`, and writes the files into `/etc/aimesh-snmp-proxy/ap1`. `--force` replaces the
-   files that the installer seeded.
+**2. Generate the config for the instance.** `init` reads the configs of your other services and
+picks a free block of ports for `snmp.port_base`. It sets `state_dir` to the instance folder, names
+the root `aimesh-ap1`, and writes the files into `/etc/aimesh-snmp-proxy/ap1`. `--force` replaces the
+files that the installer seeded.
 
-   ```sh
-   APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
-   sudo $APP init --instance ap1 --detect --force
-   ```
+```sh
+APP=/opt/aimesh-snmp-proxy/venv/bin/aimesh-snmp-proxy
+sudo $APP init --instance ap1 --detect --force
+```
 
-   To write the files yourself, see [Write the config by hand](onboarding/manual.md). Use the
-   instance folder and pass `-c` to every command.
+To write the files yourself, see [Write the config by hand](onboarding/manual.md). Use the instance
+folder and pass `-c` to every command.
 
-3. Run the installer for the instance again. The unit reads `asus.host`.
+**3. Run the installer for the instance again.** The unit reads `asus.host`.
 
-   ```sh
-   sudo ./deploy/install.sh --instance ap1
-   ```
+```sh
+sudo ./deploy/install.sh --instance ap1
+```
 
-4. Check the config and test. Pass `-c` so the command reads the instance config. Keep the service
-   stopped while you test.
+**4. Check the config and test.** Pass `-c` so the command reads the instance config. Keep the
+service stopped while you test.
 
-   ```sh
-   CONF=/etc/aimesh-snmp-proxy/ap1/config.toml
-   sudo $APP -c $CONF discover
-   sudo $APP -c $CONF check-config
-   sudo $APP -c $CONF selftest
-   ```
+```sh
+CONF=/etc/aimesh-snmp-proxy/ap1/config.toml
+sudo $APP -c $CONF discover
+sudo $APP -c $CONF check-config
+sudo $APP -c $CONF selftest
+```
 
-5. Start the instance, then start your other services again:
+**5. Start the instance, then start your other services again.**
 
-   ```sh
-   sudo systemctl enable --now aimesh-snmp-proxy@ap1
-   sudo systemctl start aimesh-snmp-proxy
-   systemd-analyze security aimesh-snmp-proxy@ap1
-   ```
+```sh
+sudo systemctl enable --now aimesh-snmp-proxy@ap1
+sudo systemctl start aimesh-snmp-proxy
+systemd-analyze security aimesh-snmp-proxy@ap1
+```
 
-6. Add its devices to LibreNMS with `onboard`. Put an `[onboard]` table in the instance config. The
-   instance keeps its own `onboarded.json`, so `onboard --remove` deletes only that instance's
-   devices.
+**6. Add its devices to LibreNMS with `onboard`.** Put an `[onboard]` table in the instance config.
+The instance keeps its own `onboarded.json`, so `onboard --remove` deletes only that instance's
+devices. Turn ICMP off before `--apply` and on after. See [LibreNMS](librenms.md).
 
-   ```sh
-   sudo $APP -c $CONF onboard
-   sudo $APP -c $CONF onboard --apply
-   ```
-
-   Turn ICMP off before `--apply` and on after. See [LibreNMS](librenms.md).
+```sh
+sudo $APP -c $CONF onboard
+sudo $APP -c $CONF onboard --apply
+```
 
 ## Upgrade and remove instances
 

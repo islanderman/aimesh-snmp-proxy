@@ -72,21 +72,32 @@ sudo systemctl edit aimesh-snmp-proxy
 The installer keeps the config, the secrets, and the state. It rebuilds the shared environment and
 restores the old one if the build fails.
 
-1. Download and verify the new bundle. See [Installation](installation.md).
-2. Stop every service: `sudo systemctl stop 'aimesh-snmp-proxy*'`.
-3. Unpack the bundle and run the installer from its folder:
+**1. Download and verify the new bundle.** See [Installation](installation.md).
 
-   ```sh
-   sudo tar -xzf aimesh-snmp-proxy-NEW.tar.gz -C /usr/local/src
-   cd /usr/local/src/aimesh-snmp-proxy-NEW
-   sudo ./deploy/install.sh
-   ```
+**2. Stop every service.**
 
-4. Compare your config with the new example. The installer prints the path:
-   `diff /etc/aimesh-snmp-proxy/config.toml config.example.toml`. Read the
-   [changelog](changelog.md) for new keys.
-5. Check and start: `sudo $APP check-config`, then `sudo systemctl start aimesh-snmp-proxy`.
-   Start each instance too.
+```sh
+sudo systemctl stop 'aimesh-snmp-proxy*'
+```
+
+**3. Unpack the bundle and run the installer from its folder.**
+
+```sh
+sudo tar -xzf aimesh-snmp-proxy-NEW.tar.gz -C /usr/local/src
+cd /usr/local/src/aimesh-snmp-proxy-NEW
+sudo ./deploy/install.sh
+```
+
+**4. Compare your config with the new example.** The installer prints the path:
+`diff /etc/aimesh-snmp-proxy/config.toml config.example.toml`. Read the [changelog](changelog.md) for
+new keys.
+
+**5. Check and start.** Start each instance too.
+
+```sh
+sudo $APP check-config
+sudo systemctl start aimesh-snmp-proxy
+```
 
 All services share one environment and one unit template. Run the installer once without
 `--instance` to upgrade them all. On a host that has instances only, run
@@ -163,33 +174,33 @@ See [Troubleshooting](troubleshooting.md#the-log-says-latched).
 
 ## Uninstall
 
-1. Optional: delete the LibreNMS devices that `onboard` created. This needs a new API token and the
-   `[onboard]` table. See [Remove the devices](librenms.md#remove-the-devices).
+**1. Optional: delete the LibreNMS devices that `onboard` created.** This needs a new API token and
+the `[onboard]` table. See [Remove the devices](librenms.md#remove-the-devices).
 
-   ```sh
-   sudo $APP onboard --remove --apply
-   ```
+```sh
+sudo $APP onboard --remove --apply
+```
 
-2. Remove each instance first. The single service owns the shared environment, so the installer
-   refuses to remove it while instances remain.
+**2. Remove each instance first.** The single service owns the shared environment, so the installer
+refuses to remove it while instances remain.
 
-   ```sh
-   sudo ./deploy/install.sh --instance NAME --uninstall
-   ```
+```sh
+sudo ./deploy/install.sh --instance NAME --uninstall
+```
 
-3. Remove the single service. This stops it, removes the unit, the unit template, and the
-   environment. It keeps `/etc/aimesh-snmp-proxy` and the state.
+**3. Remove the single service.** This stops it and removes the unit, the unit template, and the
+environment. It keeps `/etc/aimesh-snmp-proxy` and the state.
 
-   ```sh
-   sudo ./deploy/install.sh --uninstall
-   ```
+```sh
+sudo ./deploy/install.sh --uninstall
+```
 
-4. Optional: add `--purge` to delete the config and the state too. The command asks you to type
-   `purge`. Pass `--yes` to skip that. The state holds the port pins, so a later install may give
-   your devices other ports.
+**4. Optional: delete the config and the state too.** Add `--purge`. The command asks you to type
+`purge`. Pass `--yes` to skip that. The state holds the port pins, so a later install may give your
+devices other ports.
 
-   ```sh
-   sudo ./deploy/install.sh --uninstall --purge
-   ```
+```sh
+sudo ./deploy/install.sh --uninstall --purge
+```
 
 Use `--dry-run` with any of these commands to see the plan first.
