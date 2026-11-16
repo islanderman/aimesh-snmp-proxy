@@ -232,8 +232,9 @@ make_archive() { # make_archive STAGE_PARENT DIRNAME: reproducible, root-owned
   list=$WORK/files.list
   mkdir -p "$OUT_DIR"
   (cd "$parent" && find "$dir" | LC_ALL=C sort >"$list")
+  # Owner and group root:0 by name and id; GNU tar takes NAME:ID, bsdtar sets each apart.
   if tar --version 2>/dev/null | grep -q 'GNU tar'; then
-    owner=(--owner=0 --group=0 --numeric-owner)
+    owner=(--owner=root:0 --group=root:0)
   else
     owner=(--uid 0 --gid 0 --uname root --gname root)
   fi
