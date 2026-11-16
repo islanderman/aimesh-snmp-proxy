@@ -115,10 +115,10 @@ After it finishes, the layout is:
 
 ```text
 /opt/aimesh-snmp-proxy/venv/                  Python environment
-/etc/aimesh-snmp-proxy/config.toml            your configuration
-/etc/aimesh-snmp-proxy/asus_password          router password (you fill it in)
-/etc/aimesh-snmp-proxy/snmp_community         SNMP community (you fill it in)
-/etc/aimesh-snmp-proxy/asus_router.pem        pinned router certificate (you create it)
+/etc/aimesh-snmp-proxy/config.toml            your configuration (a seed that `init` replaces)
+/etc/aimesh-snmp-proxy/asus_password          router password (empty until `init` writes it)
+/etc/aimesh-snmp-proxy/snmp_community         SNMP community (empty until `init` writes it)
+/etc/aimesh-snmp-proxy/asus_router.pem        pinned router certificate (empty until it is pinned)
 /etc/systemd/system/aimesh-snmp-proxy.service the unit
 /var/lib/aimesh-snmp-proxy/                   state, created by the first `discover` or by the service
 ```
@@ -127,8 +127,7 @@ Next, write the config. Follow the guide for your router type:
 [Choose your path](onboarding/index.md). Its config step runs `init`, which asks a few questions and
 writes the config and the secrets.
 
-The installer prints its own list of next steps for a setup by hand. You can ignore it: `init` does
-that work. If you already edited the files by hand, `init` needs `--force`.
+If you already edited the files by hand, `init` needs `--force`.
 
 ## Check the sandbox
 
